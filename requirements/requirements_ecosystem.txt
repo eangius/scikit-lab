@@ -1,13 +1,11 @@
 # ABOUT: dependencies related to scikit-learn
 
-hdbscan                                     # hierarchical clustering
 imbalanced-learn                            # data balancing
 keras                                       # deep-learning
 scikit-learn                                # machine learning
 scikit-lego                                 # machine learning extensions
-scikit-optimize                             # machine learning cross validation
+scikit-optimize                             # machine learning param tuning
 scikeras                                    # integrate scikit-learn + keras
+pandas                                      # data frames
 tensorflow-macos; sys_platform=="darwin"    # deep learning with MacOS accelerated hardware
 tensorflow; sys_platform!="darwin"          # deep learning regular hardware
-umap-learn                                  # manifold dimensionality reduction
-xgboost                                     # gradient boosting
