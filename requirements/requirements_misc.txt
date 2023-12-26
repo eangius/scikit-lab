@@ -1,0 +1,5 @@
+# ABOUT: miscellaneous dependencies
+
+h3                                          # geospatial
+shapely                                     # geometries
+
