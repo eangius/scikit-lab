@@ -1,0 +1,5 @@
+# ABOUT: dependencies related to documentation
+
+mkdocs                          # build static markdown
+mkdocstrings[python]            # auto generate from docstrings
+mkdocs-material                 # style documentations

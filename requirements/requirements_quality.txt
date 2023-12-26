@@ -1,0 +1,6 @@
+# ABOUT: dependencies related to testing
+
+cython                          # optimized python
+pytest                          # unit test
+pytest-benchmark                # test runtime profile
+pytest-cov                      # dynamic test code coverage
