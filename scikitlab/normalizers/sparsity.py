@@ -2,7 +2,7 @@
 
 # External libraries
 from sklearn.preprocessing import FunctionTransformer
-from scipy.sparse import csr_matrix, csc_matrix
+from scipy.sparse import csr_matrix
 
 
 class DenseTransformer(FunctionTransformer):
@@ -20,8 +20,7 @@ class DenseTransformer(FunctionTransformer):
         )
 
     @staticmethod
-    def func(X, y=None):
-        print(f"dbg>> DenseTrans: {type(X)=} X=\n{X}")
+    def func(X, **kwargs):
         return X.todense()
 
 
@@ -40,6 +39,5 @@ class SparseTransformer(FunctionTransformer):
         )
 
     @staticmethod
-    def func(X, y=None):
-        print(f"dbg>> SparseTrans: {type(X)=} X=\n{X}")
+    def func(X, **kwargs):
         return csr_matrix(X)
