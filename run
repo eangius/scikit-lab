@@ -1,0 +1,128 @@
+#!/usr/bin/env bash
+# ABOUT: helper command line launcher script for common project
+# operations encapsulating from technology & environment details.
+
+
+# Ensure using local venv libraries.
+if [[ "${VIRTUAL_ENV}" == "" ]]; then
+  if [ -d ".venv" ]; then
+    source ".venv/bin/activate";
+  else
+    echo "Need a virtual environment to activate";
+    exit 1;
+  fi;
+fi
+
+# Listen for ctrl-c signals & forward to child processes.
+trap 'pkill -P ${$};' SIGINT;
+
+
+# ABOUT: display usage of specific or all known commands.
+function fn_help() {
+  local app; app=$(basename "${0}");
+  local format='  %s%20s\n';
+  echo "USAGE:";
+  if [ ${1:-'install'} == 'install' ]; then
+      printf "${format}" "${app} --install;                    # install dependencies";
+  fi;
+  if [ ${1:-'build'} == 'build' ]; then
+      printf "${format}" "${app} --build;                      # compile & packages code";
+  fi;
+  if [ ${1:-'doc'} == 'doc' ]; then
+      printf "${format}" "${app} --doc;                        # generate documentation";
+  fi;
+  if [ ${1:-'test'} == 'test' ]; then
+      printf "${format}" "${app} --test <path/test_*.py>;      # perform unit & integration tests";
+  fi;
+  if [ ${1:-'repl'} == 'repl' ]; then
+      printf "${format}" "${app} --repl                        # launch a python console";
+  fi;
+  if [ ${1:-'deploy'} == 'deploy' ]; then
+      printf "${format}" "${app} --deploy;                     # deploy packages";
+  fi;
+  if [ ${1:-'all'} == 'all' ]; then
+      printf "${format}" "${app} --all;                        # end-to-end flow";
+  fi;
+  exit 0;
+}
+
+
+# ABOUT: installs all dependencies into local environment
+function fn_install() {
+  echo -e ">> Installing dependencies into: ${VIRTUAL_ENV}";
+  for req in requirements/requirements_*.txt; do
+    pip install -r "${req}" "${@}";
+  done
+}
+
+
+# ABOUT: cythonizes respective code modules & packages them
+function fn_build() {
+  echo -e ">> Building project ..";
+  local build_dir="/tmp";
+  python setup.py clean && \
+  python setup.py build_ext \
+    -b "${build_dir}" \
+    -t "${build_dir}" \
+    --inplace \
+    --parallel "$(sysctl -n hw.ncpu || echo 1)" \
+    --force \
+    --quiet &&
+  python setup.py sdist egg_info --egg-base "${build_dir}";
+}
+
+
+# ABOUT: execute quality control
+function fn_test() {
+  echo -e ">> Running test suite ..";
+  pytest \
+    -c=tests/code_tests.cfg --cov \
+    --cov-config=tests/code_coverage.cfg \
+    --benchmark-storage=runtime/code_benchmarks
+    "${@}";
+}
+
+
+# ABOUT: launch a python console to run custom code same as the system would.
+function fn_repl() {
+  python "${@}";
+}
+
+
+# ABOUT: build technical documentation
+function fn_document() {
+  echo -e ">> Documenting codebase ..";
+  mkdocs serve;
+}
+
+
+# ABOUT: public deploy package to python index
+function fn_deploy() {
+  echo -e ">> Packaging project ..";
+  local PYPI_API_TOKEN='';
+  local PYPI_SERVER="pypi";
+  twine upload \
+    --username __token__ \
+    --password "${PYPI_API_TOKEN}" \
+    --repository "${PYPI_SERVER}" \
+    dist/*;
+}
+
+
+# Process commands
+cmd=${1} && shift 1;
+case ${cmd} in
+  --install | install)    fn_install "${@}";;
+  --build | build)        fn_build "${@}";;
+  --doc | doc)            fn_document "${@}";;
+  --test | test)          fn_test "${@}";;
+  --repl | repl)          fn_repl "${@}";;
+  --deploy | deploy)      fn_deploy "${@}";;
+  --all | all)            fn_install && \
+                          fn_build && \
+                          fn_document && \
+                          fn_test && \
+                          fn_deploy;;
+  --help | help | *)      fn_help "${@}";;
+esac
+exit 0;
