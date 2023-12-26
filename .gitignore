@@ -1,0 +1,23 @@
+# MISCELLANEOUS
+**/.DS_Store
+*.swp
+*.diff
+.coverage*
+
+# ENVIRONMENTS
+.idea
+.venv*
+__pycache__/
+.pytest_cache
+
+# SYSTEM
+runtime/
+dist/
+*.egg-info
+
+# COMPILED
+*.py[cod]
+*$py.class
+*.c
+*.so
+*.o
