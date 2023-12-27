@@ -3,6 +3,7 @@
 # Internal libraries
 from scikitlab.normalizers.sparsity import *
 from scikitlab.vectorizers.temporal import *
+from scikitlab.vectorizers.spatial import *
 
 # External libraries
 import pytest
@@ -13,6 +14,7 @@ components = [
     SparseTransformer(),
     DenseTransformer(),
     DateTimeVectorizer(),
+    GeoVectorizer(resolution=1),
 ]
 
 
