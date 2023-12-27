@@ -79,6 +79,7 @@ function fn_test() {
     -c=tests/code_tests.cfg --cov \
     --cov-config=tests/code_coverage.cfg \
     --benchmark-storage=runtime/code_benchmarks \
+    --verbosity 3 \
     "${@}";
 }
 
