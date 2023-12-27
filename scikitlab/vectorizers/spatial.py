@@ -2,7 +2,7 @@
 
 
 # Internal libraries
-from source.ml.vectorizers.frequential import ItemCountVectorizer
+from scikitlab.vectorizers.frequential import ItemCountVectorizer
 
 # External libraries
 from shapely.geometry.point import Point
@@ -35,7 +35,7 @@ class GeoVectorizer(ItemCountVectorizer):
     ):
         if index_scheme != 'h3':
             # TODO: implement geohash, s2, ..
-            raise NotImplemented(
+            raise NotImplementedError(
                 f"Unrecognized indexing schem {index_scheme}"
             )
 
