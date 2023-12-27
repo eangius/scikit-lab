@@ -1,7 +1,7 @@
 #!usr/bin/env python
 
 # Internal libraries
-from source.ml.samplers import ScikitSampler
+from scikitlab.samplers import ScikitSampler
 
 # External libraries
 import warnings
