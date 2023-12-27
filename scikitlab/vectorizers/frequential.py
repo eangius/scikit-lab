@@ -1,7 +1,7 @@
 #!usr/bin/env python
 
 # Internal libraries
-from source.ml.vectorizers import ScikitVectorizer
+from scikitlab.vectorizers import ScikitVectorizer
 
 
 # External libraries
