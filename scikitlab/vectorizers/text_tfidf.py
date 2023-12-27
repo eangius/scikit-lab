@@ -8,11 +8,13 @@ from typing import Callable
 from overrides import overrides
 
 
-# ABOUT: composite scikit component that manages ngram weighted frequency vectors
-# like tf-idf or count vectorizers. Since smaller ngrams are more frequent but less
-# insightful than larger ngrams, this component allows fair weighting & filtering
-# ngrams proportionally to their token size throughout the corpus.
 class WeightedNgramVectorizer(FeatureUnion):
+    """
+    Composite scikit component that manages ngram weighted frequency vectors like
+    tf-idf or count vectorizers. Since smaller ngrams are more frequent but less
+    insightful than larger ngrams, this component allows fair weighting & filtering
+    ngrams proportionally to their token size throughout the corpus.
+    """
 
     # construct self as concatenation of ngram size transformers.
     def __init__(
