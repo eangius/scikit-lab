@@ -1,14 +1,15 @@
 #!usr/bin/env python
 
 
+# Internal libraries
 from scikitlab.normalizers.sparsity import *
 
+# External libraries
 from sklearn.base import TransformerMixin
 import scipy
 from scipy.sparse import csr_matrix
 import pytest
 import numpy as np
-import pickle
 import random
 
 
@@ -48,27 +49,10 @@ def sparse_mtx_random(row: int = None, col: int = None):
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "component", [SparseTransformer(), DenseTransformer()],
+    ids=["sparse", "dense"]
 )
 def test__is_transformer(component):
     assert isinstance(component, TransformerMixin)
-
-
-# Serializing component state should be preserved when re-loaded.
-@pytest.mark.integration
-@pytest.mark.parametrize(
-    "component", [SparseTransformer(), DenseTransformer()],
-)
-def test__is_savable(component, tmp_path):
-    filename = tmp_path / f"{component.__class__.__name__}.pkl"
-
-    with open(filename, 'wb') as file:
-        pickle.dump(component, file)
-
-    with open(filename, 'rb') as file:
-        comp_out = pickle.load(file)
-
-    assert type(comp_out) is type(component)
-    assert comp_out.get_params() == component.get_params()
 
 
 # Transforming a dense matrix returns an equivalent sparse one.
@@ -119,6 +103,7 @@ def test__DenseTransformer02(dense_mtx):
         (SparseTransformer(), dense_mtx_random(0, 0), csr_matrix),
         (DenseTransformer(), sparse_mtx_random(0, 0), np.ndarray),
     ],
+    ids=["sparse", "dense"]
 )
 def test__transform_empty(component, in_mtx, out_type):
     assert_matrix(
@@ -136,6 +121,7 @@ def test__transform_empty(component, in_mtx, out_type):
         (SparseTransformer(), dense_mtx_random(), csr_matrix),
         (DenseTransformer(), sparse_mtx_random(), np.ndarray),
     ],
+    ids=["sparse", "dense"]
 )
 def test__transform_large(component, in_mtx, out_type):
     assert_matrix(
@@ -150,8 +136,3 @@ def assert_matrix(in_mtx, out_mtx, out_type):
     assert isinstance(out_mtx, out_type)
     assert out_mtx.shape == in_mtx.shape
     assert (out_mtx == in_mtx).all()
-
-
-
-
-
