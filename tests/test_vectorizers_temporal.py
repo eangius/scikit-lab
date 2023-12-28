@@ -1,6 +1,7 @@
 #!usr/bin/env python
 
 # Internal libraries
+from tests.common.pytest_parametrized import *
 from scikitlab.vectorizers.temporal import *
 
 # External libraries
@@ -28,17 +29,14 @@ def test__DateTimeVectorizer02():
 
 
 @pytest.mark.unit
-def test__DateTimeVectorizer03(X):
+@pytest_mark_polymorphic
+def test__DateTimeVectorizer03(input_container):
+    X = input_container([datetime.datetime.now()])
     component = DateTimeVectorizer(weights={"month": 1})
     vtrs = component.transform(X)
     assert isinstance(vtrs, np.ndarray)
     assert vtrs.shape == (X.shape[0], 2)
     assert np.all((vtrs >= -1) & (vtrs <= 1))
-
-
-@pytest.fixture
-def X():
-    return pd.DataFrame([datetime.datetime.now()])
 
 
 @pytest.fixture
