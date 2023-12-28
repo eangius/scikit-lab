@@ -47,7 +47,7 @@ class GeoVectorizer(ItemCountVectorizer):
             raise ValueError("Unrecognized items.")
 
         self.offset = offset
-        if self.offset < 0:
+        if self.offset < 1:
             raise ValueError("Invalid offset")
 
         super().__init__(**kwargs)
@@ -104,8 +104,8 @@ class GeoVectorizer(ItemCountVectorizer):
 
     # returns 1
     def _parents(self, geom: Point) -> list:
-        return [h3.h3_to_parent(self._cells(geom)[0], self.resolution - self.offset)]
+        return [h3.h3_to_parent(self._cells(geom)[0], max(self.resolution - self.offset, 0))]
 
     # returns many
     def _children(self, geom: Point) -> list:
-        return h3.h3_to_children(self._cells(geom)[0], self.resolution + self.offset).tolist()
+        return h3.h3_to_children(self._cells(geom)[0], min(self.resolution + self.offset, 15)).tolist()
