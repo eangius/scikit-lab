@@ -6,9 +6,16 @@ from tests.common.random_data import *
 from scikitlab.vectorizers.spatial import *
 
 # External libraries
+from sklearn.base import TransformerMixin
 from scipy.sparse import csr_matrix
 import pytest
 import random
+
+
+# Ensure component is a transformer.
+@pytest.mark.unit
+def test__is_transformer(component):
+    assert isinstance(component, TransformerMixin)
 
 
 # Invalid geohash resolutions should raise an exception
@@ -130,30 +137,22 @@ def test__GeoVectorizer_transform06(input_container):
 # should work.
 @pytest.mark.stress
 @pytest_mark_polymorphic
-def test__GeoVectorizer_transform07(input_container):
+def test__GeoVectorizer_transform07(input_container, component):
     X = input_container(RandomData.geo_points())
-    component = GeoVectorizer(
-        resolution=random.randint(0, 15),
-        items=set(random.sample(
-            population=['cells', 'neighbors', 'parents', 'children'],
-            k=random.randint(1, 4)
-        )),
-        offset=random.randint(1, 4)
+    assert_geohashes(
+        vtrs=component.fit_transform(X),
+        geos=component.get_feature_names_out(),
+        n_samples=X.shape[0],
+        n_geohashes=None
     )
-    # assert_geohashes(
-    #     vtrs=component.fit_transform(X),
-    #     geos=component.get_feature_names_out(),
-    #     n_samples=X.shape[0],
-    #     n_geohashes=3
-    # )
 
 
 # Inverse transforming from vectors should return near original input.
 @pytest.mark.integration
 @pytest_mark_polymorphic
 def test__GeoVectorizer_inverse01(input_container):
-    X = input_container([RandomData.geo_point()])
-    tolerance = 1e-5  # due to geohash centroid & cartesian dist approx
+    X = input_container([RandomData.geo_point(lat=43.651070, lng=-79.347015)])
+    tolerance = 1e-5  # due to geohash centroid & cartesian dist with deg approx
     component = GeoVectorizer(resolution=15)
     vtrs = component.fit_transform(X)
     pts = component.inverse_transform(vtrs)
@@ -166,13 +165,22 @@ def test__GeoVectorizer_inverse01(input_container):
     )
 
 
-def assert_geohashes(vtrs, geos, n_samples, n_geohashes):
+def assert_geohashes(vtrs, geos, n_samples, n_geohashes=None):
     assert isinstance(vtrs, csr_matrix)             # sparse matrix
     assert isinstance(geos, np.ndarray)
-    assert vtrs.shape == (n_samples, n_geohashes)   # expected n-geohashes
-    assert geos.shape == (n_geohashes, )
+    if n_geohashes:  # expected n-geohashes if known
+        assert vtrs.shape == (n_samples, n_geohashes)
+        assert geos.shape == (n_geohashes, )
 
 
-
-
-# Point(43.651070, -79.347015)
+@pytest.fixture
+def component():
+    return GeoVectorizer(
+        index_scheme='h3',
+        offset=random.randint(1, 2),       # else too many hashes
+        resolution=random.randint(7, 12),  # else too many hashes
+        items=set(random.sample(
+            population=['cells', 'neighbors', 'parents', 'children'],
+            k=random.randint(1, 4)
+        )),
+    )
