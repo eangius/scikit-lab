@@ -33,58 +33,79 @@ class GeoVectorizer(ItemCountVectorizer):
         offset: int = 1,           # neighbouring or hierarchical cells away from this
         **kwargs                   # see ItemCountVectorizer inputs.
     ):
-        if index_scheme != 'h3':
-            # TODO: implement geohash, s2, ..
-            raise NotImplementedError(
-                f"Unrecognized indexing schem {index_scheme}"
-            )
+        # TODO: implement geohash, s2, ..
+        self.index_scheme = index_scheme
+        if self.index_scheme != 'h3':
+            raise NotImplementedError(f"Unrecognized indexing schem {index_scheme}")
 
         self.resolution = resolution
+        if resolution not in range(15 + 1):
+            raise ValueError(f"{index_scheme} resolution not in range")
+
         self.items = items or {'cells'}
+        if self.items - {'cells', 'neighbors', 'parents', 'children'} != set():
+            raise ValueError("Unrecognized items.")
+
         self.offset = offset
-        self.index_scheme = index_scheme
+        if self.offset < 0:
+            raise ValueError("Invalid offset")
+
         super().__init__(**kwargs)
         return
 
     @overrides
     def transform(self, X, y=None):
-        X = self._convert(X)
-        return super().transform(X, y)
+        """
+        :param X: vector of shapely lat/lng points.
+        :param y: unused target variables.
+        :return: one-hot-encoded sparse vector of geohashes.
+        """
+        return super().transform(self._convert(X), y)
 
     @overrides
     def fit_transform(self, X, y=None):
-        X = self._convert(X)
-        return super().fit_transform(X, y)
+        return super().fit_transform(self._convert(X), y)
 
     @overrides
     def inverse_transform(self, X):
+        """
+        :param X: one-hot-encoded sparse vector of geohashes.
+        :return: vector of shapely lat/lng points.
+        """
         return np.array([
-            h3.h3_to_geo(y) if y else self.out_of_vocab  # approx to hash centroid
+            Point(h3.h3_to_geo(y)) if y else self.out_of_vocab  # approx to hash centroid
             for y in super().inverse_transform(X)
         ])
 
     # accumulates item types into the same vector
     def _convert(self, X):
         X = X.values.ravel() if isinstance(X, pd.DataFrame) else X
-        items = []
-        if 'cells' in self.items:
-            items.extend(list(map(self._cells, X)))
-        if 'neighbors' in self.items:
-            items.extend(list(map(self._neighbors, X)))
-        if 'parents' in self.items:
-            items.extend(list(map(self._parents, X)))
-        if 'children' in self.items:
-            items.extend(list(map(self._children, X)))
-        return np.array(items).reshape(-1, 1)  # for ItemCountVectorizer
+        docs = []
+        for pt in X:
+            items = []
+            if 'cells' in self.items:
+                items.extend(self._cells(pt))
+            if 'neighbors' in self.items:
+                items.extend(self._neighbors(pt))
+            if 'parents' in self.items:
+                items.extend(self._parents(pt))
+            if 'children' in self.items:
+                items.extend(self._children(pt))
+            docs.extend(items)
+        return np.array(docs).reshape(X.shape[0], -1)
 
-    def _cells(self, geom: Point):
-        return h3.geo_to_h3(geom.y, geom.x, self.resolution)  # lon/lat order
+    # returns 1
+    def _cells(self, geom: Point) -> list:
+        return [h3.geo_to_h3(geom.x, geom.y, self.resolution)]
 
-    def _neighbors(self, geom: Point):
-        return h3.hex_ring(self._cells(geom), self.setps)
+    # returns 6
+    def _neighbors(self, geom: Point) -> list:
+        return h3.hex_ring(self._cells(geom)[0], self.offset).tolist()
 
-    def _parents(self, geom: Point):
-        return h3.h3_to_parent(self._cells(geom), self.resolution - self.offset)
+    # returns 1
+    def _parents(self, geom: Point) -> list:
+        return [h3.h3_to_parent(self._cells(geom)[0], self.resolution - self.offset)]
 
-    def _children(self, geom: Point):
-        return h3.h3_to_children(self._cells(geom), self.resolution + self.offset)
+    # returns many
+    def _children(self, geom: Point) -> list:
+        return h3.h3_to_children(self._cells(geom)[0], self.resolution + self.offset).tolist()

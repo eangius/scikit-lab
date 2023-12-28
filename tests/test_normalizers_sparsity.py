@@ -2,15 +2,14 @@
 
 
 # Internal libraries
+from tests.common.random_data import *
 from scikitlab.normalizers.sparsity import *
 
 # External libraries
 from sklearn.base import TransformerMixin
-import scipy
 from scipy.sparse import csr_matrix
 import pytest
 import numpy as np
-import random
 
 
 @pytest.fixture
@@ -27,21 +26,6 @@ def sparse_mtx():
             np.array([0, 2, 3]),           # pointers
         ),
         shape=(2, 3)
-    )
-
-
-def dense_mtx_random(row: int = None, col: int = None):
-    return np.random.rand(
-        row or random.randint(500, 9000),
-        col or random.randint(500, 9000)
-    )
-
-
-def sparse_mtx_random(row: int = None, col: int = None):
-    return scipy.sparse.rand(
-        row or random.randint(500, 9000),
-        col or random.randint(500, 9000),
-        format='csr'
     )
 
 
@@ -100,8 +84,8 @@ def test__DenseTransformer02(dense_mtx):
 @pytest.mark.parametrize(
     "component,in_mtx,out_type",
     [
-        (SparseTransformer(), dense_mtx_random(0, 0), csr_matrix),
-        (DenseTransformer(), sparse_mtx_random(0, 0), np.ndarray),
+        (SparseTransformer(), RandomData.dense_mtx(0, 0), csr_matrix),
+        (DenseTransformer(), RandomData.sparse_mtx(0, 0), np.ndarray),
     ],
     ids=["sparse", "dense"]
 )
@@ -118,8 +102,8 @@ def test__transform_empty(component, in_mtx, out_type):
 @pytest.mark.parametrize(
     "component,in_mtx,out_type",
     [
-        (SparseTransformer(), dense_mtx_random(), csr_matrix),
-        (DenseTransformer(), sparse_mtx_random(), np.ndarray),
+        (SparseTransformer(), RandomData.dense_mtx(), csr_matrix),
+        (DenseTransformer(), RandomData.sparse_mtx(), np.ndarray),
     ],
     ids=["sparse", "dense"]
 )
