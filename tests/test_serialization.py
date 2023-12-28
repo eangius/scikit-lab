@@ -35,5 +35,3 @@ def test__joblib_savability(component, tmp_path):
 
     assert type(comp_out) is type(component)
     assert comp_out.get_params() == component.get_params()
-
-
