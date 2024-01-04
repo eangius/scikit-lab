@@ -6,6 +6,8 @@ import random
 import scipy
 import numpy as np
 from shapely.geometry.point import Point
+from typing import Callable
+from datetime import timedelta, datetime
 
 
 class RandomData:
@@ -15,20 +17,12 @@ class RandomData:
     """
 
     @classmethod
-    def geo_point(cls, lat: float = None, lng: float = None):
+    def point(cls, lat: float = None, lng: float = None):
         """ generates a specific or random lat/lng point """
         return Point(
             lat or random.randrange(-90, 90),
             lng or random.randrange(-180, 180),
         )
-
-    @classmethod
-    def geo_points(cls, n_min: int = 0, n_max: int = 5000) -> list:
-        """ generates a random list of lat/lng points """
-        return [
-            cls.geo_point()
-            for _ in range(random.randint(n_min, n_max))
-        ]
 
     @classmethod
     def dense_mtx(cls, row: int = None, col: int = None, n_min: int = 0, n_max: int = 5000):
@@ -46,3 +40,24 @@ class RandomData:
             col or random.randint(n_min, n_max),
             format='csr'
         )
+
+    @classmethod
+    def date(cls, start: datetime = None, n_min: int = 1000, n_max: int = 1000):
+        """ generates a random date around another"""
+        start = start or datetime.now()
+        day1 = start - timedelta(days=n_min)
+        day2 = start + timedelta(days=n_max)
+        delta = day2 - day1
+        return day1 + timedelta(
+            seconds=random.randrange(
+                (delta.days * 24 * 60 * 60) + delta.seconds
+            )
+        )
+
+    @classmethod
+    def list(cls, fn: Callable, n_min: int = 0, n_max: int = 5000, **kwargs) -> list:
+        """ generates a random list data as per the function """
+        return [
+            fn(**kwargs)
+            for _ in range(random.randint(n_min, n_max))
+        ]
