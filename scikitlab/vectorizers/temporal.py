@@ -2,15 +2,12 @@
 
 
 # External libraries
-from joblib import wrap_non_picklable_objects
 from sklearn.preprocessing import FunctionTransformer
-from sklearn.pipeline import FeatureUnion
+from sklearn.compose import ColumnTransformer
 from typing import *
-from functools import *
 import numpy as np
 import pandas as pd
 from overrides import overrides
-from datetime import datetime, timezone
 
 
 class PeriodicityTransformer(FunctionTransformer):
@@ -30,14 +27,13 @@ class PeriodicityTransformer(FunctionTransformer):
 
     def __init__(
         self,
-        period: int,    # <<dbg can we infer at fit?
-        fn: Callable,
+        period: int,    # TODO: infer this at fit time
         **kwargs
     ):
         self.period = period
-        self.fn = wrap_non_picklable_objects(fn)
         super().__init__(
-            func=self._forward_func,  # <<dbg define inverse func
+            func=self._forward_func,
+            inverse_func=self._inverse_func,
             feature_names_out=None,
             check_inverse=False,
             **kwargs
@@ -49,19 +45,28 @@ class PeriodicityTransformer(FunctionTransformer):
         return np.array(["sin", "cos"])
 
     def _forward_func(self, X, **kwargs):
-        if not X.size:
-            return np.ndarray(shape=(0, 2))
+        angle = (2 * np.pi) * X / self.period
+        return np.column_stack(
+            (np.sin(angle), np.cos(angle))
+        )
 
-        X = X[0].tolist() if isinstance(X, pd.DataFrame) else X
-        X = [self.fn(x) for x in pd.to_datetime(X)]  # <<dbg hack belongs at call site
+    # NOTE: this doesn't quite re-constructs original signal as
+    # its absoluteness is lost in the cos & sin periodicity of its
+    # parts.
+    def _inverse_func(self, X, **kwargs):
+        const = self.period / (2 * np.pi)
+        return np.hstack(
+            (np.arcsin(X), np.arccos(X))
+        ) * const
 
-        angle = 2 * np.pi * np.array(X) / self.period
-        return np.array([
-            np.sin(angle), np.cos(angle)
-        ]).transpose()
+    # needed to serialize
+    def __eq__(self, other) -> bool:
+        return \
+            isinstance(other, PeriodicityTransformer) and \
+            self.get_params(deep=True) == other.get_params(deep=True)
 
 
-class DateTimeVectorizer(FeatureUnion):
+class DateTimeVectorizer(ColumnTransformer):
     """
     Encodes a date-time into a collection of trigonometrically encoded attribute
     parts. This vectorizer allows to emphasize on certain time attributes by weight
@@ -79,7 +84,7 @@ class DateTimeVectorizer(FeatureUnion):
 
         transformer_list, transformer_weights = self._build()
         super().__init__(
-            transformer_list=transformer_list,
+            transformers=transformer_list,
             transformer_weights=transformer_weights,
             n_jobs=kwargs.pop("n_jobs", None),
             verbose=kwargs.pop("verbose", False),
@@ -87,42 +92,62 @@ class DateTimeVectorizer(FeatureUnion):
         )
         return
 
+    @overrides
+    def transform(self, X):
+        if not X.size:
+            return np.ndarray(shape=(0, 2 * len(self.transformer_weights.keys())))
+
+        # convert to pandas to access time parts.
+        X = \
+            X[0].tolist() if isinstance(X, pd.DataFrame) else \
+            X.to_list() if isinstance(X, pd.Series) else \
+            X
+        X = pd.to_datetime(X)
+        X = X.tz_localize(tz='utc', ambiguous='infer') if self.utc_norm else X
+        X = pd.DataFrame(X)[0]
+
+        # parse out timestamp into config parts.
+        X = np.array([
+            [
+                DateTimeVectorizer._possible_attributes[name][1](x)  # time parser fn
+                for name in self.transformer_weights.keys()
+            ]
+            for x in X
+        ])
+        return super().fit_transform(X)  # avoid unfitted checks
+
     def _build(self) -> Tuple[List, Dict]:
         transformer_list = []
         transformer_weights = dict()
-        for field, weight in self.weights.items():
+        for i, (field, weight) in enumerate(self.weights.items()):
             if weight != 0:
-                feature = self.time_attribute[field]
-                transformer_list.append((field, feature))
+                feature, _ = self._possible_attributes[field]
+                transformer_list.append((field, feature, i))
                 transformer_weights[field] = weight
         return transformer_list, transformer_weights
 
-    def _validate(self, weights: Optional[Dict[str, float]]) -> Dict[str, float]:
+    @staticmethod
+    def _validate(weights: Optional[Dict[str, float]]) -> Dict[str, float]:
         # default all attributes if empty
         weights = weights or {
             attr: 1
-            for attr in self.time_attribute.keys()
+            for attr in DateTimeVectorizer._possible_attributes.keys()
         }
         # validate all weights
         for k, v in weights.items():
-            if k not in self.time_attribute.keys():
+            if k not in DateTimeVectorizer._possible_attributes.keys():
                 raise ValueError(f"Unrecognized time attribute: '{k}'")
             if v < 0 or v > 1.0:
                 raise ValueError(f"Weight of time attribute '{k}' is out of range")
         return weights
 
     # supported attributes with their frequency & date-time extraction function.
-    @cached_property
-    def time_attribute(self):
-        return {
-        'season':   PeriodicityTransformer(period=4, fn=wrap_non_picklable_objects(lambda dt: (self._conv(dt).month % 12 // 3) + 1)),  # approx hemisphere independent
-        'month':    PeriodicityTransformer(period=12, fn=wrap_non_picklable_objects(lambda dt: self._conv(dt).month)),
-        'weekday':  PeriodicityTransformer(period=7, fn=wrap_non_picklable_objects(lambda dt: self._conv(dt).weekday())),
-        'hour':     PeriodicityTransformer(period=24, fn=wrap_non_picklable_objects(lambda dt: self._conv(dt).hour)),
-        'minute':   PeriodicityTransformer(period=60, fn=wrap_non_picklable_objects(lambda dt: self._conv(dt).minute)),
-        'second':   PeriodicityTransformer(period=60, fn=wrap_non_picklable_objects(lambda dt: self._conv(dt).second)),
-        'microsec': PeriodicityTransformer(period=1000000, fn=wrap_non_picklable_objects(lambda dt: self._conv(dt).microsecond)),
+    _possible_attributes = {
+        'season':   (PeriodicityTransformer(period=4), lambda dt: (dt.month % 12 // 3) + 1),  # approx hemisphere independent
+        'month':    (PeriodicityTransformer(period=12), lambda dt: dt.month),
+        'weekday':  (PeriodicityTransformer(period=7), lambda dt: dt.weekday()),
+        'hour':     (PeriodicityTransformer(period=24), lambda dt: dt.hour),
+        'minute':   (PeriodicityTransformer(period=60), lambda dt: dt.minute),
+        'second':   (PeriodicityTransformer(period=60), lambda dt: dt.second),
+        'microsec': (PeriodicityTransformer(period=1000000), lambda dt: dt.microsecond),
     }
-
-    def _conv(self, dt: datetime):
-        return dt.astimezone(timezone.utc) if self.utc_norm else dt
