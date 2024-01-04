@@ -13,6 +13,7 @@ import joblib
 components = [
     SparseTransformer(),
     DenseTransformer(),
+    PeriodicityTransformer(period=24, fn=lambda dt: dt.hour),
     DateTimeVectorizer(),
     GeoVectorizer(resolution=1),
 ]

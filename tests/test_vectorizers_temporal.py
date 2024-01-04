@@ -87,12 +87,15 @@ def assert_vectors(vtrs, n_samples, n_dims):
 
 @pytest.fixture
 def component():
-    return DateTimeVectorizer(weights={
-        "season": random.random(),
-        "month": random.random(),
-        "weekday": random.random(),
-        "hour": random.random(),
-        "minute": random.random(),
-        "second": random.random(),
-        "microsec": random.random(),
-    })
+    return DateTimeVectorizer(
+        utc_norm=bool(random.getrandbits(1)),
+        weights={
+            "season": random.random(),
+            "month": random.random(),
+            "weekday": random.random(),
+            "hour": random.random(),
+            "minute": random.random(),
+            "second": random.random(),
+            "microsec": random.random(),
+        },
+    )
