@@ -49,7 +49,7 @@ def test__GeoVectorizer_error02():
 @pytest.mark.unit
 @pytest_mark_polymorphic
 def test__GeoVectorizer_transform01(input_container):
-    X = input_container([RandomData.geo_point()])
+    X = input_container([RandomData.point()])
     component = GeoVectorizer(resolution=5, items={'cells'})
     assert_geohashes(
         vtrs=component.fit_transform(X),
@@ -63,7 +63,7 @@ def test__GeoVectorizer_transform01(input_container):
 @pytest.mark.unit
 @pytest_mark_polymorphic
 def test__GeoVectorizer_transform02(input_container):
-    X = input_container([RandomData.geo_point()])
+    X = input_container([RandomData.point()])
     component = GeoVectorizer(resolution=5, items={'neighbors'})
     assert_geohashes(
         vtrs=component.fit_transform(X),
@@ -77,7 +77,7 @@ def test__GeoVectorizer_transform02(input_container):
 @pytest.mark.unit
 @pytest_mark_polymorphic
 def test__GeoVectorizer_transform03(input_container):
-    X = input_container([RandomData.geo_point()])
+    X = input_container([RandomData.point()])
     component = GeoVectorizer(resolution=5, items={'parents'})
     assert_geohashes(
         vtrs=component.fit_transform(X),
@@ -91,7 +91,7 @@ def test__GeoVectorizer_transform03(input_container):
 @pytest.mark.unit
 @pytest_mark_polymorphic
 def test__GeoVectorizer_transform04(input_container):
-    X = input_container([RandomData.geo_point()])
+    X = input_container([RandomData.point()])
     component = GeoVectorizer(resolution=5, items={'children'})
     assert_geohashes(
         vtrs=component.fit_transform(X),
@@ -105,7 +105,7 @@ def test__GeoVectorizer_transform04(input_container):
 @pytest.mark.unit
 @pytest_mark_polymorphic
 def test__GeoVectorizer_transform05(input_container):
-    X = input_container([RandomData.geo_point()])
+    X = input_container([RandomData.point()])
     component = GeoVectorizer(resolution=5, items={'cells', 'neighbors', 'parents', 'children'})
     assert_geohashes(
         vtrs=component.fit_transform(X),
@@ -119,7 +119,7 @@ def test__GeoVectorizer_transform05(input_container):
 @pytest.mark.unit
 @pytest_mark_polymorphic
 def test__GeoVectorizer_transform06(input_container):
-    X = input_container([RandomData.geo_point()])
+    X = input_container([RandomData.point()])
     component = GeoVectorizer(
         resolution=5,
         items={'cells', 'neighbors', 'parents', 'children'},
@@ -138,7 +138,7 @@ def test__GeoVectorizer_transform06(input_container):
 @pytest.mark.stress
 @pytest_mark_polymorphic
 def test__GeoVectorizer_transform07(input_container, component):
-    X = input_container(RandomData.geo_points())
+    X = input_container(RandomData.list(RandomData.point))
     assert_geohashes(
         vtrs=component.fit_transform(X),
         geos=component.get_feature_names_out(),
@@ -151,7 +151,7 @@ def test__GeoVectorizer_transform07(input_container, component):
 @pytest.mark.integration
 @pytest_mark_polymorphic
 def test__GeoVectorizer_inverse01(input_container):
-    X = input_container([RandomData.geo_point(lat=43.651070, lng=-79.347015)])
+    X = input_container([RandomData.point(lat=43.651070, lng=-79.347015)])
     tolerance = 1e-5  # due to geohash centroid & cartesian dist with deg approx
     component = GeoVectorizer(resolution=15)
     vtrs = component.fit_transform(X)
