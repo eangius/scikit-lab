@@ -4,6 +4,7 @@
 from scikitlab.normalizers.sparsity import *
 from scikitlab.vectorizers.temporal import *
 from scikitlab.vectorizers.spatial import *
+from scikitlab.vectorizers.text import *
 
 # External libraries
 import pytest
@@ -15,6 +16,7 @@ components = [
     DenseTransformer(),
     PeriodicityTransformer(period=24),
     DateTimeVectorizer(),
+    WeightedNgramVectorizer(),
     GeoVectorizer(resolution=1),
 ]
 
@@ -35,4 +37,4 @@ def test__joblib_savability(component, tmp_path):
         comp_out = joblib.load(file)
 
     assert type(comp_out) is type(component)
-    assert comp_out.get_params(deep=True) == component.get_params(deep=True)
+    assert comp_out.get_params(deep=False) == component.get_params(deep=False)

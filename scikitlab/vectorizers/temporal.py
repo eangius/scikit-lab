@@ -59,12 +59,6 @@ class PeriodicityTransformer(FunctionTransformer):
             (np.arcsin(X), np.arccos(X))
         ) * const
 
-    # needed to serialize
-    def __eq__(self, other) -> bool:
-        return \
-            isinstance(other, PeriodicityTransformer) and \
-            self.get_params(deep=True) == other.get_params(deep=True)
-
 
 class DateTimeVectorizer(ColumnTransformer):
     """

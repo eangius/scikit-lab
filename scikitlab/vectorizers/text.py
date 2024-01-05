@@ -19,7 +19,7 @@ class WeightedNgramVectorizer(FeatureUnion):
     # construct self as concatenation of ngram size transformers.
     def __init__(
         self,
-        vectorizer_type: str,                       # Type of the vectorizer "tfidf" or "count"
+        vectorizer_type: str = 'tfidf',             # Type of the vectorizer "tfidf" or "count"
         weight_fn: Callable[[int], float] = None,   # function to weight n-grams by size.
         ngram_range: tuple = (1, 1),                # min/max ngram sizes to build.
         n_jobs: int = None,                         # parallel process
