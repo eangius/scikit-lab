@@ -79,7 +79,9 @@ function fn_test() {
     --config-file=tests/code_tests.cfg \
     --cov \
     --cov-config=tests/code_coverage.cfg \
-    --cov-report=html --cov-report=xml \
+    --cov-report=term \
+    --cov-report=html \
+    --cov-report=xml \
     --benchmark-storage=runtime/code_benchmarks \
     --junitxml=runtime/code_tests/report.xml \
     --verbosity 3 \
