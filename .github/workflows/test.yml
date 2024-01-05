@@ -47,3 +47,12 @@ jobs:
     - name: Test Suite
       run: |
         ./run --test;
+        genbadge coverage \
+            --input-file runtime/code_coverage/report.xml \
+            --output-file runtime/code_coverage/badge.svg;
+
+    - name: Upload Runtime Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: runtime
+        path: runtime
