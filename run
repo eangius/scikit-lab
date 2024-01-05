@@ -76,8 +76,10 @@ function fn_build() {
 function fn_test() {
   echo -e ">> Running test suite ..";
   pytest \
-    -c=tests/code_tests.cfg --cov \
+    -c=tests/code_tests.cfg \
+    --cov \
     --cov-config=tests/code_coverage.cfg \
+    --cov-report=html --cov-report=xml \
     --benchmark-storage=runtime/code_benchmarks \
     --verbosity 3 \
     "${@}";
