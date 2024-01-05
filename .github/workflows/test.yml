@@ -1,4 +1,4 @@
-# ABOUT: github workflow to automatically check code sanity on commints to main branch.
+# ABOUT: git-hub workflow to automatically check code sanity on commits to main branch.
 
 name: Commit Sanity
 
@@ -24,17 +24,31 @@ jobs:
       with:
         python-version: "3.9"
 
+    # Fetch external dependencies but cache them for reuse in parallel or
+    # subsequent git-hub jobs by tracking changes to requirements files.
+    - name: Prepare Virtual Environment
+      uses: syphar/restore-virtualenv@v1
+      id: cache-virtualenv
+      with:
+        requirement_files:
+            **/requirements/requirements_*.txt
+
+    - name: Restore Virtual Environment
+      uses: syphar/restore-pip-download-cache@v1
+      if: steps.cache-virtualenv.outputs.cache-hit != 'true'
+
     - name: Install Dependencies
       run: |
         python -m pip install --upgrade pip
         pip install flake8 pytest
         ./run --install;
+      if: steps.cache-virtualenv.outputs.cache-hit != 'true'
 
+    # Stop build if there are syntax errors or undefined names but treat all other
+    # errors as warnings. Github editor is 127 chars wide.
     - name: Lint Code Correctness
       run: |
-        # stop the build if there are Python syntax errors or undefined names
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
     - name: Test Suite
