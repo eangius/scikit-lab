@@ -1,6 +1,7 @@
 # ABOUT: dependencies related to testing
 
 cython                          # optimized python
+genbadge[all]                   # status badge generation
 pytest                          # unit test
 pytest-benchmark                # test runtime profile
 pytest-cov                      # dynamic test code coverage
