@@ -47,18 +47,23 @@ jobs:
     - name: Test Suite
       run: |
         ./run --test;
+        genbadge tests \
+            --input-file runtime/code_tests/report.xml \
+            --output-file runtime/code_tests/badge.svg;
         genbadge coverage \
             --input-file runtime/code_coverage/report.xml \
             --output-file runtime/code_coverage/badge.svg;
 
-    # Publish badges via hidden gists. See
-    # https://github.com/marketplace/actions/dynamic-badges
+    # Publish badges via hidden gists. See 
+    # https://github.com/marketplace/actions/deploy-to-gist
     - name: Create Badge
-      uses: schneegans/dynamic-badges-action@v1.7.0
+      uses: exuanbo/actions-deploy-gist@v1
       with:
-        auth: ${{ secrets.GIST_SECRET }}
-        gistID: eb12b64cf81f991888c6bfd3f3419064
-        filename: runtime/code_coverage/badge.svg
+        token: ${{ secrets.GIST_SECRET }}
+        gist_id: eb12b64cf81f991888c6bfd3f3419064
+        gist_file_name: coverage_badge.svg
+        file_path: runtime/code_coverage/badge.svg
+        file_type: binary
 
     - name: Upload Runtime Artifacts
       uses: actions/upload-artifact@v3
