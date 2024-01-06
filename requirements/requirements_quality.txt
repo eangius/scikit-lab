@@ -5,3 +5,4 @@ genbadge[all]                   # status badge generation
 pytest                          # unit test
 pytest-benchmark                # test runtime profile
 pytest-cov                      # dynamic test code coverage
+pre-commit                      # github commit hoocks

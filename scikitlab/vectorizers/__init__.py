@@ -10,7 +10,6 @@ from sklearn.base import BaseEstimator, TransformerMixin
 # by vectorizer components. These are components that transform their input across
 # their domain (ie: text-->vector, $US-->vector, ..).
 class ScikitVectorizer(ABC, BaseEstimator, TransformerMixin):
-
     @property
     def _estimator_type(self):
         return "vectorizer"
@@ -24,4 +23,3 @@ class ScikitVectorizer(ABC, BaseEstimator, TransformerMixin):
     # Convenience for sub classes.
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)
-

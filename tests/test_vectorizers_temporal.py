@@ -1,9 +1,9 @@
 #!usr/bin/env python
 
 # Internal libraries
-from tests.common.pytest_parametrized import *
-from tests.common.random_data import *
-from scikitlab.vectorizers.temporal import *
+from tests.common.pytest_parametrized import pytest_mark_polymorphic
+from tests.common.random_data import RandomData
+from scikitlab.vectorizers.temporal import DateTimeVectorizer
 
 # External libraries
 import pytest
@@ -23,10 +23,12 @@ def test__is_transformer(component):
 @pytest.mark.unit
 def test__DateTimeVectorizer_error01():
     with pytest.raises(ValueError):
-        DateTimeVectorizer(weights={
-            "season": -1,       # too small
-            "month": 1.23,      # too large
-        })
+        DateTimeVectorizer(
+            weights={
+                "season": -1,  # too small
+                "month": 1.23,  # too large
+            }
+        )
 
 
 # Empty inputs should yield empty vectors
@@ -38,7 +40,7 @@ def test__DateTimeVectorizer_transform01(input_container):
     assert_vectors(
         vtrs=component.transform(X),
         n_samples=X.shape[0],
-        n_dims=2 * len(component.weights)
+        n_dims=2 * len(component.weights),
     )
 
 
@@ -48,11 +50,7 @@ def test__DateTimeVectorizer_transform01(input_container):
 def test__DateTimeVectorizer_transform02(input_container):
     X = input_container([datetime.datetime.now()])
     component = DateTimeVectorizer(weights={"month": 1})
-    assert_vectors(
-        vtrs=component.transform(X),
-        n_samples=X.shape[0],
-        n_dims=2
-    )
+    assert_vectors(vtrs=component.transform(X), n_samples=X.shape[0], n_dims=2)
 
 
 # Vectorizing time parts as weighted should
@@ -64,7 +62,7 @@ def test__DateTimeVectorizer_transform03(input_container):
     assert_vectors(
         vtrs=component.transform(X),
         n_samples=X.shape[0],
-        n_dims=2 * len(component.weights)
+        n_dims=2 * len(component.weights),
     )
 
 
@@ -75,7 +73,7 @@ def test__DateTimeVectorizer_transform04(input_container, component):
     assert_vectors(
         vtrs=component.transform(X),
         n_samples=X.shape[0],
-        n_dims=2 * len(component.weights)
+        n_dims=2 * len(component.weights),
     )
 
 

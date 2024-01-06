@@ -21,10 +21,10 @@ class RegressionBalancer(ScikitSampler):
 
     def __init__(
         self,
-        sampling_mode: str,         # either "over" or "under" sampling
-        fn_classifier: Callable,    # how to triage regressor variable into classes
-        random_state: int = 0,      # determinism
-        **kwargs
+        sampling_mode: str,  # either "over" or "under" sampling
+        fn_classifier: Callable,  # how to triage regressor variable into classes
+        random_state: int = 0,  # determinism
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.sampling_mode = sampling_mode
@@ -36,7 +36,7 @@ class RegressionBalancer(ScikitSampler):
     def _fit_resample(self, X, y):
         # classify output into a temporary target
         y = y.to_numpy().ravel()
-        y_cls = pd.Series(y).apply(self.fn_classifier).astype('category')
+        y_cls = pd.Series(y).apply(self.fn_classifier).astype("category")
         sampling_dist = y_cls.value_counts().to_dict()
 
         # clone minority classes to match the majority
@@ -44,8 +44,10 @@ class RegressionBalancer(ScikitSampler):
             target_cls = max(sampling_dist)
             target_n = sampling_dist[target_cls]
             sampler = RandomOverSampler(
-                sampling_strategy={cls: target_n for cls in sampling_dist if cls != target_cls},
-                random_state=self.random_state
+                sampling_strategy={
+                    cls: target_n for cls in sampling_dist if cls != target_cls
+                },
+                random_state=self.random_state,
             )
 
         # delete from majority classes to match the minority
@@ -53,8 +55,10 @@ class RegressionBalancer(ScikitSampler):
             target_cls = min(sampling_dist)
             target_n = sampling_dist[target_cls]
             sampler = RandomUnderSampler(
-                sampling_strategy={cls: target_n for cls in sampling_dist if cls != target_cls},
-                random_state=self.random_state
+                sampling_strategy={
+                    cls: target_n for cls in sampling_dist if cls != target_cls
+                },
+                random_state=self.random_state,
             )
 
         # do nothing

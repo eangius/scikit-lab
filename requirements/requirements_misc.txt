@@ -2,4 +2,3 @@
 
 h3                                          # geospatial
 shapely                                     # geometries
-

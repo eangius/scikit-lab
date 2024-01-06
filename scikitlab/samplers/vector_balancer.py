@@ -18,7 +18,7 @@ class VectorBalancer(ScikitSampler):
     the non-majority classes near the decision boundary to generate synthetic
     but relevant examples as well under-sample from all classes near the decision
     boundary to cleanup for noisy data. In order to interpolate the space, this
-    component operates on vectors rather than raw datapoints. 
+    component operates on vectors rather than raw datapoints.
     """
 
     def __init__(
@@ -26,9 +26,9 @@ class VectorBalancer(ScikitSampler):
         deduplicate: bool = False,  # remove duplicate vectors
         down_sample: bool = False,  # remove redundant vectors
         over_sample: bool = False,  # clone minority vectors
-        synthesize: bool = False,   # generate borderline synthetic vectors
-        random_state: int = 0,      # determinism
-        **kwargs
+        synthesize: bool = False,  # generate borderline synthetic vectors
+        random_state: int = 0,  # determinism
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.deduplicate = deduplicate
@@ -45,13 +45,10 @@ class VectorBalancer(ScikitSampler):
         # de-emphasize frequent by removing redundant label/vector duplicates.
         if self.deduplicate:
             df = pd.DataFrame(data=vtrs.x)
-            df['lbl'] = vtrs.y
+            df["lbl"] = vtrs.y
             df = df.drop_duplicates(keep="first")
             cols = len(df.columns)
-            vtrs = DataSet(
-                x=df.iloc[:, :(cols - 1)].values,
-                y=df['lbl'].values
-            )
+            vtrs = DataSet(x=df.iloc[:, : (cols - 1)].values, y=df["lbl"].values)
 
         # NOTE: following under/over sampling does not apply when vectors encode
         # text sequence because results in invalid out-of-domain dimensions in
@@ -59,35 +56,38 @@ class VectorBalancer(ScikitSampler):
 
         # under-sample by cleaning inconsistent
         if self.down_sample:
-            vtrs = DataSet.from_tuple(EditedNearestNeighbours(
-                n_neighbors=11,   # lower is too aggressive
-                kind_sel='mode',  # remove when majority disagrees with label
-                sampling_strategy='majority',
-            ).fit_resample(
-                X=vtrs.x,
-                y=vtrs.y,
-            ))
+            vtrs = DataSet.from_tuple(
+                EditedNearestNeighbours(
+                    n_neighbors=11,  # lower is too aggressive
+                    kind_sel="mode",  # remove when majority disagrees with label
+                    sampling_strategy="majority",
+                ).fit_resample(
+                    X=vtrs.x,
+                    y=vtrs.y,
+                )
+            )
 
         # over-sample by injecting synthetic
         if self.synthesize:
-            vtrs = DataSet.from_tuple(BorderlineSMOTE(
-                k_neighbors=5,
-                m_neighbors=10,
-                sampling_strategy='not majority',
-                random_state=self.random_state,
-            ).fit_resample(
-                X=vtrs.x,
-                y=vtrs.y,
-            ))
+            vtrs = DataSet.from_tuple(
+                BorderlineSMOTE(
+                    k_neighbors=5,
+                    m_neighbors=10,
+                    sampling_strategy="not majority",
+                    random_state=self.random_state,
+                ).fit_resample(
+                    X=vtrs.x,
+                    y=vtrs.y,
+                )
+            )
 
         # over-sample any remaining imbalance by randomly duping minority cases
         if self.over_sample:
-            vtrs = DataSet.from_tuple(RandomOverSampler(
-                sampling_strategy='not majority',
-                random_state=self.random_state,
-            ).fit_resample(
-                X=vtrs.x,
-                y=vtrs.y
-            ))
+            vtrs = DataSet.from_tuple(
+                RandomOverSampler(
+                    sampling_strategy="not majority",
+                    random_state=self.random_state,
+                ).fit_resample(X=vtrs.x, y=vtrs.y)
+            )
 
         return vtrs.x, vtrs.y

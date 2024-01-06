@@ -7,5 +7,5 @@ You can run various subsets of the tests as follows:
 ./run --test;                                    # everything
 ./run --test -m <test_type>;                     # unit, integration or stress
 ./run --test tests/<test_file.py>::<test_func>;  # specific tests
-./run --test -k '[<test_name_pattern>]';         # parametrized auto generated  
+./run --test -k '[<test_name_pattern>]';         # parametrized auto generated
 ```

@@ -28,18 +28,20 @@ class WeightedNgramVectorizer(FeatureUnion):
     # construct self as concatenation of ngram size transformers.
     def __init__(
         self,
-        vectorizer_type: str = 'tfidf',             # Type of the vectorizer "tfidf" or "count"
-        weight_fn: Callable[[int], float] = None,   # function to weight n-grams by size.
-        ngram_range: tuple = (1, 1),                # min/max ngram sizes to build.
-        n_jobs: int = None,                         # parallel process
-        verbose: bool = False,                      # verbose
-        **kwargs                                    # args for base vectorizer
+        vectorizer_type: str = "tfidf",  # Type of the vectorizer "tfidf" or "count"
+        weight_fn: Callable[[int], float] = None,  # function to weight n-grams by size.
+        ngram_range: tuple = (1, 1),  # min/max ngram sizes to build.
+        n_jobs: int = None,  # parallel process
+        verbose: bool = False,  # verbose
+        **kwargs,  # args for base vectorizer
     ):
         self.vectorizer_type = vectorizer_type
         self.weight_fn = weight_fn
         self.ngram_range = ngram_range
 
-        trans = TfidfVectorizer if vectorizer_type.lower() == 'tfidf' else CountVectorizer
+        trans = (
+            TfidfVectorizer if vectorizer_type.lower() == "tfidf" else CountVectorizer
+        )
         transformers = {
             n: trans(
                 ngram_range=(n, n),
@@ -49,20 +51,24 @@ class WeightedNgramVectorizer(FeatureUnion):
         }
 
         super().__init__(
-            transformer_weights={f"{n}gram": weight_fn(n) for n in transformers} if weight_fn else None,
+            transformer_weights={f"{n}gram": weight_fn(n) for n in transformers}
+            if weight_fn
+            else None,
             transformer_list=[(f"{n}gram", trans) for n, trans in transformers.items()],
             n_jobs=n_jobs,
-            verbose=verbose
+            verbose=verbose,
         )
         return
 
     # strip prefix "ngram__" transformer name
     @overrides
     def get_feature_names_out(self, input_features=None):
-        return np.array([
-            ngram.split('gram__', 1)[1]
-            for ngram in super().get_feature_names_out(input_features)
-        ])
+        return np.array(
+            [
+                ngram.split("gram__", 1)[1]
+                for ngram in super().get_feature_names_out(input_features)
+            ]
+        )
 
 
 class UniversalSentenceEncoder(ScikitVectorizer):
@@ -74,7 +80,9 @@ class UniversalSentenceEncoder(ScikitVectorizer):
     """
 
     def __init__(self, resource_dir: str = None):
-        self.resource_dir = resource_dir or 'https://tfhub.dev/google/universal-sentence-encoder/4'
+        self.resource_dir = (
+            resource_dir or "https://tfhub.dev/google/universal-sentence-encoder/4"
+        )
 
     @overrides
     def transform(self, X, y=None):
@@ -84,22 +92,21 @@ class UniversalSentenceEncoder(ScikitVectorizer):
 
     @cached_property
     def dimensionality(self) -> int:
-        return self.transform(['']).shape[-1]
+        return self.transform([""]).shape[-1]
 
     def get_feature_names_out(self, _unused_input_features=None):
-        return np.array([
-            f"{self.__class__.__name__}{i}"
-            for i in range(self.dimensionality)
-        ])
+        return np.array(
+            [f"{self.__class__.__name__}{i}" for i in range(self.dimensionality)]
+        )
 
     # dynamically unpack & load since tensorflow model is not serializable
     @cached_property
     def embedding(self):
         if not os.path.exists(self.resource_dir):
-            archive = f'{self.resource_dir}.zip'
+            archive = f"{self.resource_dir}.zip"
             if not os.path.exists(archive):
                 raise IOError(f"resource {self.resource_dir} not available")
 
-            with ZipFile(archive, 'r') as zip_ref:
+            with ZipFile(archive, "r") as zip_ref:
                 zip_ref.extractall(Path(self.resource_dir).parent)
         return hub.load(self.resource_dir)

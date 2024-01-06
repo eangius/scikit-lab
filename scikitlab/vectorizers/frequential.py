@@ -26,13 +26,13 @@ class ItemCountVectorizer(ScikitVectorizer):
 
     def __init__(
         self,
-        fn_norm: Callable = None,   # how to transform individual items per input.
-        min_freq: float = 0.0,      # filter rare items bellow this threshold.
-        max_freq: float = 1.0,      # filter frequent items above this threshold.
-        max_items: int = None,      # keep only top most frequent items in corpus.
-        out_of_vocab: str = None,   # feature name for catching un-recognized/filtered items.
-        binary: bool = False,       # simply flag all non-zero counts items.
-        **kwargs
+        fn_norm: Callable = None,  # how to transform individual items per input.
+        min_freq: float = 0.0,  # filter rare items bellow this threshold.
+        max_freq: float = 1.0,  # filter frequent items above this threshold.
+        max_items: int = None,  # keep only top most frequent items in corpus.
+        out_of_vocab: str = None,  # feature name for catching un-recognized/filtered items.
+        binary: bool = False,  # simply flag all non-zero counts items.
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.fn_norm = fn_norm
@@ -43,7 +43,7 @@ class ItemCountVectorizer(ScikitVectorizer):
         self.binary = binary
 
         # internal state
-        self.vocabulary_ = None         # dict[item -> index]
+        self.vocabulary_ = None  # dict[item -> index]
         self.removed_items_ = None
         return
 
@@ -59,15 +59,25 @@ class ItemCountVectorizer(ScikitVectorizer):
             X.data.fill(1)
 
         n = X.shape[0]
-        max_doc_count = self.max_freq if isinstance(self.max_freq, numbers.Integral) else self.max_freq * n
-        min_doc_count = self.min_freq if isinstance(self.min_freq, numbers.Integral) else self.min_freq * n
+        max_doc_count = (
+            self.max_freq
+            if isinstance(self.max_freq, numbers.Integral)
+            else self.max_freq * n
+        )
+        min_doc_count = (
+            self.min_freq
+            if isinstance(self.min_freq, numbers.Integral)
+            else self.min_freq * n
+        )
         if max_doc_count < min_doc_count:
             raise ValueError("max_freq corresponds to < documents than min_freq")
 
         if self.max_items is not None:
             X = self._sort_features(X, vocabulary)
 
-        X, self.removed_items_ = self._limit_features(X, vocabulary, max_doc_count, min_doc_count, self.max_items)
+        X, self.removed_items_ = self._limit_features(
+            X, vocabulary, max_doc_count, min_doc_count, self.max_items
+        )
         if self.max_items is None:
             X = self._sort_features(X, vocabulary)
 
@@ -181,7 +191,11 @@ class ItemCountVectorizer(ScikitVectorizer):
             return X, removed_terms
 
         # Calculate a mask based on document frequencies
-        dfs = np.bincount(X.indices, minlength=X.shape[1]) if sp.isspmatrix_csr(X) else np.diff(X.indptr)
+        dfs = (
+            np.bincount(X.indices, minlength=X.shape[1])
+            if sp.isspmatrix_csr(X)
+            else np.diff(X.indptr)
+        )
 
         # TODO: avoid filtering vocabulary[0] if self.out_of_vocab is set.
         mask = np.ones(len(dfs), dtype=bool)

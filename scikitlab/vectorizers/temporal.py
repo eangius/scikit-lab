@@ -4,7 +4,7 @@
 # External libraries
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.compose import ColumnTransformer
-from typing import *
+from typing import Dict, Tuple, List, Optional
 import numpy as np
 import pandas as pd
 from overrides import overrides
@@ -27,8 +27,8 @@ class PeriodicityTransformer(FunctionTransformer):
 
     def __init__(
         self,
-        period: int,    # TODO: infer this at fit time
-        **kwargs
+        period: int,  # TODO: infer this at fit time
+        **kwargs,
     ):
         self.period = period
         super().__init__(
@@ -36,7 +36,7 @@ class PeriodicityTransformer(FunctionTransformer):
             inverse_func=self._inverse_func,
             feature_names_out=None,
             check_inverse=False,
-            **kwargs
+            **kwargs,
         )
         return
 
@@ -46,18 +46,14 @@ class PeriodicityTransformer(FunctionTransformer):
 
     def _forward_func(self, X, **kwargs):
         angle = (2 * np.pi) * X / self.period
-        return np.column_stack(
-            (np.sin(angle), np.cos(angle))
-        )
+        return np.column_stack((np.sin(angle), np.cos(angle)))
 
     # NOTE: this doesn't quite re-constructs original signal as
     # its absoluteness is lost in the cos & sin periodicity of its
     # parts.
     def _inverse_func(self, X, **kwargs):
         const = self.period / (2 * np.pi)
-        return np.hstack(
-            (np.arcsin(X), np.arccos(X))
-        ) * const
+        return np.hstack((np.arcsin(X), np.arccos(X))) * const
 
 
 class DateTimeVectorizer(ColumnTransformer):
@@ -70,8 +66,8 @@ class DateTimeVectorizer(ColumnTransformer):
     def __init__(
         self,
         weights: Dict[str, float] = None,  # time attributes, default all
-        utc_norm: bool = False,            # converts to coordinated universal time
-        **kwargs
+        utc_norm: bool = False,  # converts to coordinated universal time
+        **kwargs,
     ):
         self.weights = self._validate(weights)
         self.utc_norm = utc_norm
@@ -82,7 +78,7 @@ class DateTimeVectorizer(ColumnTransformer):
             transformer_weights=transformer_weights,
             n_jobs=kwargs.pop("n_jobs", None),
             verbose=kwargs.pop("verbose", False),
-            **kwargs
+            **kwargs,
         )
         return
 
@@ -92,22 +88,29 @@ class DateTimeVectorizer(ColumnTransformer):
             return np.ndarray(shape=(0, 2 * len(self.transformer_weights.keys())))
 
         # convert to pandas to access time parts.
-        X = \
-            X[0].tolist() if isinstance(X, pd.DataFrame) else \
-            X.to_list() if isinstance(X, pd.Series) else \
-            X
+        X = (
+            X[0].tolist()
+            if isinstance(X, pd.DataFrame)
+            else X.to_list()
+            if isinstance(X, pd.Series)
+            else X
+        )
         X = pd.to_datetime(X)
-        X = X.tz_localize(tz='utc', ambiguous='infer') if self.utc_norm else X
+        X = X.tz_localize(tz="utc", ambiguous="infer") if self.utc_norm else X
         X = pd.DataFrame(X)[0]
 
         # parse out timestamp into config parts.
-        X = np.array([
+        X = np.array(
             [
-                DateTimeVectorizer._possible_attributes[name][1](x)  # time parser fn
-                for name in self.transformer_weights.keys()
+                [
+                    DateTimeVectorizer._possible_attributes[name][1](
+                        x
+                    )  # time parser fn
+                    for name in self.transformer_weights.keys()
+                ]
+                for x in X
             ]
-            for x in X
-        ])
+        )
         return super().fit_transform(X)  # avoid unfitted checks
 
     def _build(self) -> Tuple[List, Dict]:
@@ -124,8 +127,7 @@ class DateTimeVectorizer(ColumnTransformer):
     def _validate(weights: Optional[Dict[str, float]]) -> Dict[str, float]:
         # default all attributes if empty
         weights = weights or {
-            attr: 1
-            for attr in DateTimeVectorizer._possible_attributes.keys()
+            attr: 1 for attr in DateTimeVectorizer._possible_attributes.keys()
         }
         # validate all weights
         for k, v in weights.items():
@@ -137,11 +139,14 @@ class DateTimeVectorizer(ColumnTransformer):
 
     # supported attributes with their frequency & date-time extraction function.
     _possible_attributes = {
-        'season':   (PeriodicityTransformer(period=4), lambda dt: (dt.month % 12 // 3) + 1),  # approx hemisphere independent
-        'month':    (PeriodicityTransformer(period=12), lambda dt: dt.month),
-        'weekday':  (PeriodicityTransformer(period=7), lambda dt: dt.weekday()),
-        'hour':     (PeriodicityTransformer(period=24), lambda dt: dt.hour),
-        'minute':   (PeriodicityTransformer(period=60), lambda dt: dt.minute),
-        'second':   (PeriodicityTransformer(period=60), lambda dt: dt.second),
-        'microsec': (PeriodicityTransformer(period=1000000), lambda dt: dt.microsecond),
+        "season": (
+            PeriodicityTransformer(period=4),
+            lambda dt: (dt.month % 12 // 3) + 1,
+        ),  # approx hemisphere independent
+        "month": (PeriodicityTransformer(period=12), lambda dt: dt.month),
+        "weekday": (PeriodicityTransformer(period=7), lambda dt: dt.weekday()),
+        "hour": (PeriodicityTransformer(period=24), lambda dt: dt.hour),
+        "minute": (PeriodicityTransformer(period=60), lambda dt: dt.minute),
+        "second": (PeriodicityTransformer(period=60), lambda dt: dt.second),
+        "microsec": (PeriodicityTransformer(period=1000000), lambda dt: dt.microsecond),
     }

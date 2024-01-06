@@ -16,7 +16,7 @@ class DenseTransformer(FunctionTransformer):
             func=DenseTransformer.func,
             inverse_func=SparseTransformer.func,
             accept_sparse=True,
-            check_inverse=False
+            check_inverse=False,
         )
 
     @staticmethod
@@ -35,7 +35,7 @@ class SparseTransformer(FunctionTransformer):
             func=SparseTransformer.func,
             inverse_func=DenseTransformer.func,
             accept_sparse=False,
-            check_inverse=False
+            check_inverse=False,
         )
 
     @staticmethod

@@ -1,12 +1,9 @@
 #!usr/bin/env python
 
 # Internal libraries
-from tests.common.pytest_parametrized import *
+from tests.common.pytest_parametrized import pytest_mark_polymorphic
 from scikitlab import RESOURCE_DIR
-from scikitlab.vectorizers.text import (
-    WeightedNgramVectorizer,
-    UniversalSentenceEncoder
-)
+from scikitlab.vectorizers.text import WeightedNgramVectorizer, UniversalSentenceEncoder
 
 # External libraries
 import pytest
@@ -34,22 +31,23 @@ def test__UniversalSentenceEncoder_01(input_container, corpus):
     )
     dim = component.dimensionality
     results = component.fit_transform(X)
-    assert isinstance(results, np.ndarray)            # numpy array
+    assert isinstance(results, np.ndarray)  # numpy array
     assert np.issubdtype(results.dtype, np.floating)  # floats platform independent
-    assert type(dim) is int and dim > 0               #
-    assert results.shape == (X.shape[0], dim)         # fixed sized vectors
+    assert isinstance(dim, int) and dim > 0  #
+    assert results.shape == (X.shape[0], dim)  # fixed sized vectors
 
 
 def assert_sparse(X, results, ngrams):
-    assert isinstance(results, csr_matrix)                   # vectors are sparse
-    assert results.shape == (X.shape[0], ngrams.shape[0])    # one vector per doc
-    assert (results.todense() >= 0).all()                    # all values are non-negative
+    assert isinstance(results, csr_matrix)  # vectors are sparse
+    assert results.shape == (X.shape[0], ngrams.shape[0])  # one vector per doc
+    assert (results.todense() >= 0).all()  # all values are non-negative
 
 
 def assert_ngrams(component, ngrams):
-    assert len(ngrams.tolist()) == len(set(ngrams))           # no duplicates
-    assert all(                                               # all ngrams within config range
-        len(gram.split(' ')) in range(component.ngram_range[0], component.ngram_range[1] + 1)
+    assert len(ngrams.tolist()) == len(set(ngrams))  # no duplicates
+    assert all(  # all ngrams within config range
+        len(gram.split(" "))
+        in range(component.ngram_range[0], component.ngram_range[1] + 1)
         for gram in ngrams
     )
 
@@ -57,7 +55,7 @@ def assert_ngrams(component, ngrams):
 @pytest.fixture
 def corpus() -> list:
     return [
-        'This is the first document',
-        'Others can exist',
-        '& other documents can also exist',
+        "This is the first document",
+        "Others can exist",
+        "& other documents can also exist",
     ]

@@ -27,23 +27,25 @@ class GeoVectorizer(ItemCountVectorizer):
 
     def __init__(
         self,
-        resolution: int,           # cell size of this area (range depends on scheme)
-        index_scheme: str = 'h3',  # geo indexing scheme
-        items: Set[str] = None,    # combo of 'cells', 'neighbors', 'parents' or 'children'.
-        offset: int = 1,           # neighbouring or hierarchical cells away from this
-        **kwargs                   # see ItemCountVectorizer inputs.
+        resolution: int,  # cell size of this area (range depends on scheme)
+        index_scheme: str = "h3",  # geo indexing scheme
+        items: Set[
+            str
+        ] = None,  # combo of 'cells', 'neighbors', 'parents' or 'children'.
+        offset: int = 1,  # neighbouring or hierarchical cells away from this
+        **kwargs,  # see ItemCountVectorizer inputs.
     ):
         # TODO: implement geohash, s2, ..
         self.index_scheme = index_scheme
-        if self.index_scheme != 'h3':
+        if self.index_scheme != "h3":
             raise NotImplementedError(f"Unrecognized indexing schem {index_scheme}")
 
         self.resolution = resolution
         if resolution not in range(15 + 1):
             raise ValueError(f"{index_scheme} resolution not in range")
 
-        self.items = items or {'cells'}
-        if self.items - {'cells', 'neighbors', 'parents', 'children'} != set():
+        self.items = items or {"cells"}
+        if self.items - {"cells", "neighbors", "parents", "children"} != set():
             raise ValueError("Unrecognized items.")
 
         self.offset = offset
@@ -72,10 +74,14 @@ class GeoVectorizer(ItemCountVectorizer):
         :param X: one-hot-encoded sparse vector of geohashes.
         :return: vector of shapely lat/lng points.
         """
-        return np.array([
-            Point(h3.h3_to_geo(y)) if y else self.out_of_vocab  # approx to hash centroid
-            for y in super().inverse_transform(X)
-        ])
+        return np.array(
+            [
+                Point(h3.h3_to_geo(y))
+                if y
+                else self.out_of_vocab  # approx to hash centroid
+                for y in super().inverse_transform(X)
+            ]
+        )
 
     # accumulates item types into the same vector
     def _convert(self, X):
@@ -83,13 +89,13 @@ class GeoVectorizer(ItemCountVectorizer):
         docs = []
         for pt in X:
             items = []
-            if 'cells' in self.items:
+            if "cells" in self.items:
                 items.extend(self._cells(pt))
-            if 'neighbors' in self.items:
+            if "neighbors" in self.items:
                 items.extend(self._neighbors(pt))
-            if 'parents' in self.items:
+            if "parents" in self.items:
                 items.extend(self._parents(pt))
-            if 'children' in self.items:
+            if "children" in self.items:
                 items.extend(self._children(pt))
             docs.extend(items)
         return np.array(docs).reshape(X.shape[0], -1)
@@ -104,8 +110,12 @@ class GeoVectorizer(ItemCountVectorizer):
 
     # returns 1
     def _parents(self, geom: Point) -> list:
-        return [h3.h3_to_parent(self._cells(geom)[0], max(self.resolution - self.offset, 0))]
+        return [
+            h3.h3_to_parent(self._cells(geom)[0], max(self.resolution - self.offset, 0))
+        ]
 
     # returns many
     def _children(self, geom: Point) -> list:
-        return h3.h3_to_children(self._cells(geom)[0], min(self.resolution + self.offset, 15)).tolist()
+        return h3.h3_to_children(
+            self._cells(geom)[0], min(self.resolution + self.offset, 15)
+        ).tolist()

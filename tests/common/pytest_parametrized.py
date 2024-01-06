@@ -10,5 +10,5 @@ import pandas as pd
 pytest_mark_polymorphic = pytest.mark.parametrize(
     "input_container",
     [pd.DataFrame, pd.Series, np.array],
-    ids=['pd.DataFrame', 'pd.Series', 'np.array']
+    ids=["pd.DataFrame", "pd.Series", "np.array"],
 )

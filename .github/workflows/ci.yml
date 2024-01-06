@@ -58,7 +58,7 @@ jobs:
             --input-file runtime/code_coverage/report.xml \
             --output-file runtime/code_coverage/badge.svg;
 
-    # Publish badges via hidden gists. See 
+    # Publish badges via hidden gists. See
     # https://github.com/marketplace/actions/deploy-to-gist
     - name: Coverage Badge
       uses: exuanbo/actions-deploy-gist@v1
@@ -85,4 +85,3 @@ jobs:
         name: runtime
         path: runtime
         retention-days: 3
-

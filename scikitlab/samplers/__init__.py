@@ -12,7 +12,6 @@ from imblearn.utils._validation import ArraysTransformer
 # by data transformer components. These are components that transform the
 # volume of data-points (ie: over/under/random sampling).
 class ScikitSampler(ABC, BaseSampler):
-
     @property
     def _estimator_type(self):
         return "sampler"
@@ -24,4 +23,3 @@ class ScikitSampler(ABC, BaseSampler):
         output = self._fit_resample(X, y)
         X_, y_ = ArraysTransformer(X, y).transform(output[0], output[1])
         return (X_, y_) if len(output) == 2 else (X_, y_, output[2])
-

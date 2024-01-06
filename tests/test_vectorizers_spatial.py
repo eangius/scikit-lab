@@ -1,13 +1,15 @@
 #!usr/bin/env python
 
 # Internal libraries
-from tests.common.pytest_parametrized import *
-from tests.common.random_data import *
-from scikitlab.vectorizers.spatial import *
+from tests.common.pytest_parametrized import pytest_mark_polymorphic
+from tests.common.random_data import RandomData
+from scikitlab.vectorizers.spatial import GeoVectorizer
 
 # External libraries
 from sklearn.base import TransformerMixin
 from scipy.sparse import csr_matrix
+import numpy as np
+import pandas as pd
 import pytest
 import random
 
@@ -29,20 +31,14 @@ def test__GeoVectorizer_error00():
 @pytest.mark.unit
 def test__GeoVectorizer_error01():
     with pytest.raises(NotImplementedError):
-        GeoVectorizer(
-            resolution=1,
-            index_scheme='unknown'
-        )
+        GeoVectorizer(resolution=1, index_scheme="unknown")
 
 
 # Unrecognized items should raise an exception
 @pytest.mark.unit
 def test__GeoVectorizer_error02():
     with pytest.raises(ValueError):
-        GeoVectorizer(
-            resolution=1,
-            items={'unknown'}
-        )
+        GeoVectorizer(resolution=1, items={"unknown"})
 
 
 # Vectorizing a location cell should yield a sparse matrix with 1 geohash.
@@ -50,12 +46,12 @@ def test__GeoVectorizer_error02():
 @pytest_mark_polymorphic
 def test__GeoVectorizer_transform01(input_container):
     X = input_container([RandomData.point()])
-    component = GeoVectorizer(resolution=5, items={'cells'})
+    component = GeoVectorizer(resolution=5, items={"cells"})
     assert_geohashes(
         vtrs=component.fit_transform(X),
         geos=component.get_feature_names_out(),
         n_samples=X.shape[0],
-        n_geohashes=1
+        n_geohashes=1,
     )
 
 
@@ -64,12 +60,12 @@ def test__GeoVectorizer_transform01(input_container):
 @pytest_mark_polymorphic
 def test__GeoVectorizer_transform02(input_container):
     X = input_container([RandomData.point()])
-    component = GeoVectorizer(resolution=5, items={'neighbors'})
+    component = GeoVectorizer(resolution=5, items={"neighbors"})
     assert_geohashes(
         vtrs=component.fit_transform(X),
         geos=component.get_feature_names_out(),
         n_samples=X.shape[0],
-        n_geohashes=6
+        n_geohashes=6,
     )
 
 
@@ -78,12 +74,12 @@ def test__GeoVectorizer_transform02(input_container):
 @pytest_mark_polymorphic
 def test__GeoVectorizer_transform03(input_container):
     X = input_container([RandomData.point()])
-    component = GeoVectorizer(resolution=5, items={'parents'})
+    component = GeoVectorizer(resolution=5, items={"parents"})
     assert_geohashes(
         vtrs=component.fit_transform(X),
         geos=component.get_feature_names_out(),
         n_samples=X.shape[0],
-        n_geohashes=1
+        n_geohashes=1,
     )
 
 
@@ -92,12 +88,12 @@ def test__GeoVectorizer_transform03(input_container):
 @pytest_mark_polymorphic
 def test__GeoVectorizer_transform04(input_container):
     X = input_container([RandomData.point()])
-    component = GeoVectorizer(resolution=5, items={'children'})
+    component = GeoVectorizer(resolution=5, items={"children"})
     assert_geohashes(
         vtrs=component.fit_transform(X),
         geos=component.get_feature_names_out(),
         n_samples=X.shape[0],
-        n_geohashes=7
+        n_geohashes=7,
     )
 
 
@@ -106,12 +102,14 @@ def test__GeoVectorizer_transform04(input_container):
 @pytest_mark_polymorphic
 def test__GeoVectorizer_transform05(input_container):
     X = input_container([RandomData.point()])
-    component = GeoVectorizer(resolution=5, items={'cells', 'neighbors', 'parents', 'children'})
+    component = GeoVectorizer(
+        resolution=5, items={"cells", "neighbors", "parents", "children"}
+    )
     assert_geohashes(
         vtrs=component.fit_transform(X),
         geos=component.get_feature_names_out(),
         n_samples=X.shape[0],
-        n_geohashes=15
+        n_geohashes=15,
     )
 
 
@@ -122,14 +120,14 @@ def test__GeoVectorizer_transform06(input_container):
     X = input_container([RandomData.point()])
     component = GeoVectorizer(
         resolution=5,
-        items={'cells', 'neighbors', 'parents', 'children'},
+        items={"cells", "neighbors", "parents", "children"},
         max_items=3,
     )
     assert_geohashes(
         vtrs=component.fit_transform(X),
         geos=component.get_feature_names_out(),
         n_samples=X.shape[0],
-        n_geohashes=3
+        n_geohashes=3,
     )
 
 
@@ -143,7 +141,7 @@ def test__GeoVectorizer_transform07(input_container, component):
         vtrs=component.fit_transform(X),
         geos=component.get_feature_names_out(),
         n_samples=X.shape[0],
-        n_geohashes=None
+        n_geohashes=None,
     )
 
 
@@ -159,28 +157,28 @@ def test__GeoVectorizer_inverse01(input_container):
     assert isinstance(pts, np.ndarray)
     assert all(
         pt1.distance(pt2) < tolerance
-        for pt1, pt2 in zip(
-            X[0].tolist() if isinstance(X, pd.DataFrame) else X, pts
-        )
+        for pt1, pt2 in zip(X[0].tolist() if isinstance(X, pd.DataFrame) else X, pts)
     )
 
 
 def assert_geohashes(vtrs, geos, n_samples, n_geohashes=None):
-    assert isinstance(vtrs, csr_matrix)             # sparse matrix
+    assert isinstance(vtrs, csr_matrix)  # sparse matrix
     assert isinstance(geos, np.ndarray)
     if n_geohashes:  # expected n-geohashes if known
         assert vtrs.shape == (n_samples, n_geohashes)
-        assert geos.shape == (n_geohashes, )
+        assert geos.shape == (n_geohashes,)
 
 
 @pytest.fixture
 def component():
     return GeoVectorizer(
-        index_scheme='h3',
-        offset=random.randint(1, 2),       # else too many hashes
+        index_scheme="h3",
+        offset=random.randint(1, 2),  # else too many hashes
         resolution=random.randint(7, 12),  # else too many hashes
-        items=set(random.sample(
-            population=['cells', 'neighbors', 'parents', 'children'],
-            k=random.randint(1, 4)
-        )),
+        items=set(
+            random.sample(
+                population=["cells", "neighbors", "parents", "children"],
+                k=random.randint(1, 4),
+            )
+        ),
     )
