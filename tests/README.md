@@ -1,6 +1,6 @@
 # Test Suite
-![Tests](https://gist.github.com/eangius/eb12b64cf81f991888c6bfd3f3419064/raw/tests_badge.svg)
-![Coverage](https://gist.github.com/eangius/eb12b64cf81f991888c6bfd3f3419064/raw/coverage_badge.svg)
+![tests](https://gist.githubusercontent.com/eangius/eb12b64cf81f991888c6bfd3f3419064/raw/tests_badge.svg)
+![coverage](https://gist.githubusercontent.com/eangius/eb12b64cf81f991888c6bfd3f3419064/raw/coverage_badge.svg)
 
 You can run various subsets of the tests as follows:
 ```bash
