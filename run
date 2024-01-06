@@ -51,6 +51,7 @@ function fn_help() {
 function fn_install() {
   echo -e ">> Installing dependencies into: ${VIRTUAL_ENV}";
   for req in requirements/requirements_*.txt; do
+    echo "Processing: ${req}";
     pip install -r "${req}" "${@}";
   done
 }
