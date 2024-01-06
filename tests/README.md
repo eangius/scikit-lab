@@ -1,9 +1,8 @@
 # Test Suite
 
-[//]: [![Tests](../runtime/code_tests/badge.svg)]()
-[//]: [![Coverage](../runtime/code_coverage/badge.svg)](../runtime/code_coverage/index.html)
+![Coverage](https://gist.githubusercontent.com/eangius/eb12b64cf81f991888c6bfd3f3419064/raw/cc3cd9ef3be305d0006072dd76b8085ae7925e7e/coverage_badge.svg)
 
-We can run various subsets of the tests as follows:
+You can run various subsets of the tests as follows:
 ```bash
 ./run --test;                                    # everything
 ./run --test -m <test_type>;                     # unit, integration or stress
