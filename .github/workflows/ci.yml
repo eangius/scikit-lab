@@ -19,10 +19,14 @@ jobs:
     - name: Checkout Code
       uses: actions/checkout@v3
 
+    # Standard python with external dependencies cached from project
+    # requirements to speedup build times.
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
         python-version: "3.9"
+        cache: "pip"
+        cache-dependency-path: requirements/requirements*.txt
 
     # Fake point a virtual environment to git-hubs cached package location
     # so that CI workflows can work with our helper scripts.
@@ -74,11 +78,11 @@ jobs:
         file_path: runtime/code_tests/badge.svg
         file_type: binary
 
-    # Archive runtime artifacts
+    # Archive run time artifact to troubleshoot within a few days.
     - name: Upload Runtime Artifacts
       uses: actions/upload-artifact@v3
       with:
         name: runtime
         path: runtime
-        retention-days: 5
+        retention-days: 3
 
