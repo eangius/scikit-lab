@@ -17,6 +17,7 @@ components = [
     PeriodicityTransformer(period=24),
     DateTimeVectorizer(),
     WeightedNgramVectorizer(),
+    UniversalSentenceEncoder(),
     GeoVectorizer(resolution=1),
 ]
 

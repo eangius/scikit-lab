@@ -9,3 +9,4 @@ scikeras                                    # integrate scikit-learn + keras
 pandas                                      # data frames
 tensorflow-macos; sys_platform=="darwin"    # deep learning with MacOS accelerated hardware
 tensorflow; sys_platform!="darwin"          # deep learning regular hardware
+tensorflow-hub                              # public model repository

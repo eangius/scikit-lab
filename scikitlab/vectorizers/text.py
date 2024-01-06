@@ -1,7 +1,16 @@
 #!usr/bin/env python
 
+# Internal libraries
+from scikitlab.vectorizers import ScikitVectorizer
+
 # External libraries
+import os
 import numpy as np
+import pandas as pd
+import tensorflow_hub as hub
+from functools import cached_property
+from pathlib import Path
+from zipfile import ZipFile
 from sklearn.pipeline import FeatureUnion
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from typing import Callable
@@ -54,3 +63,43 @@ class WeightedNgramVectorizer(FeatureUnion):
             ngram.split('gram__', 1)[1]
             for ngram in super().get_feature_names_out(input_features)
         ])
+
+
+class UniversalSentenceEncoder(ScikitVectorizer):
+    """
+    Wrapper to pre-trained universal sentence encoder model to convert short
+    English texts into fixed size dense semantic vectors without need for text
+    preprocessing. This component may require warm start but is useful to
+    cluster or compare document similarities.
+    """
+
+    def __init__(self, resource_dir: str = None):
+        self.resource_dir = resource_dir or 'https://tfhub.dev/google/universal-sentence-encoder/4'
+
+    @overrides
+    def transform(self, X, y=None):
+        X = X[0].tolist() if isinstance(X, pd.DataFrame) else X
+        X = super().transform(X, y)
+        return self.embedding(X).numpy()
+
+    @cached_property
+    def dimensionality(self) -> int:
+        return self.transform(['']).shape[-1]
+
+    def get_feature_names_out(self, _unused_input_features=None):
+        return np.array([
+            f"{self.__class__.__name__}{i}"
+            for i in range(self.dimensionality)
+        ])
+
+    # dynamically unpack & load since tensorflow model is not serializable
+    @cached_property
+    def embedding(self):
+        if not os.path.exists(self.resource_dir):
+            archive = f'{self.resource_dir}.zip'
+            if not os.path.exists(archive):
+                raise IOError(f"resource {self.resource_dir} not available")
+
+            with ZipFile(archive, 'r') as zip_ref:
+                zip_ref.extractall(Path(self.resource_dir).parent)
+        return hub.load(self.resource_dir)
