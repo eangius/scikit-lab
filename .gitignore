@@ -12,6 +12,7 @@ __pycache__/
 
 # SYSTEM
 runtime/
+site/
 dist/
 *.egg-info
 
