@@ -10,7 +10,7 @@ import pandas as pd
 from overrides import overrides
 
 
-class PeriodicityTransformer(FunctionTransformer):
+class PeriodicityVectorizer(FunctionTransformer):
     """
     Trigonometrically encodes a periodic signal as combination of sine &
     cosine values. This is useful to fairly capture cyclical distances
@@ -140,13 +140,13 @@ class DateTimeVectorizer(ColumnTransformer):
     # supported attributes with their frequency & date-time extraction function.
     _possible_attributes = {
         "season": (
-            PeriodicityTransformer(period=4),
+            PeriodicityVectorizer(period=4),
             lambda dt: (dt.month % 12 // 3) + 1,
         ),  # approx hemisphere independent
-        "month": (PeriodicityTransformer(period=12), lambda dt: dt.month),
-        "weekday": (PeriodicityTransformer(period=7), lambda dt: dt.weekday()),
-        "hour": (PeriodicityTransformer(period=24), lambda dt: dt.hour),
-        "minute": (PeriodicityTransformer(period=60), lambda dt: dt.minute),
-        "second": (PeriodicityTransformer(period=60), lambda dt: dt.second),
-        "microsec": (PeriodicityTransformer(period=1000000), lambda dt: dt.microsecond),
+        "month": (PeriodicityVectorizer(period=12), lambda dt: dt.month),
+        "weekday": (PeriodicityVectorizer(period=7), lambda dt: dt.weekday()),
+        "hour": (PeriodicityVectorizer(period=24), lambda dt: dt.hour),
+        "minute": (PeriodicityVectorizer(period=60), lambda dt: dt.minute),
+        "second": (PeriodicityVectorizer(period=60), lambda dt: dt.second),
+        "microsec": (PeriodicityVectorizer(period=1000000), lambda dt: dt.microsecond),
     }

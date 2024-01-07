@@ -2,7 +2,7 @@
 
 # Internal libraries
 from scikitlab.normalizers.sparsity import SparseTransformer, DenseTransformer
-from scikitlab.vectorizers.temporal import PeriodicityTransformer, DateTimeVectorizer
+from scikitlab.vectorizers.temporal import PeriodicityVectorizer, DateTimeVectorizer
 from scikitlab.vectorizers.spatial import GeoVectorizer
 from scikitlab.vectorizers.text import WeightedNgramVectorizer, UniversalSentenceEncoder
 
@@ -14,7 +14,7 @@ import joblib
 components = [
     SparseTransformer(),
     DenseTransformer(),
-    PeriodicityTransformer(period=24),
+    PeriodicityVectorizer(period=24),
     DateTimeVectorizer(),
     WeightedNgramVectorizer(),
     UniversalSentenceEncoder(),

@@ -21,7 +21,6 @@ class ItemCountVectorizer(ScikitVectorizer):
     throughout a dataset. This class was adapted from scikits CountVectorizer
     to generalize items not only to text documents. Class also decouples any
     internal item pre-processing into a user definable normalization function.
-    see: https://github.com/scikit-learn/scikit-learn/issues/23004
     """
 
     def __init__(

@@ -6,10 +6,15 @@ from abc import ABC
 from sklearn.base import BaseEstimator, TransformerMixin
 
 
-# ABOUT: This abstract class to scikit transformer interface should be inherited
-# by vectorizer components. These are components that transform their input across
-# their domain (ie: text-->vector, $US-->vector, ..).
 class ScikitVectorizer(ABC, BaseEstimator, TransformerMixin):
+    """
+    Base implementation of scikit transformers that are responsible for
+    converting input objects into their vectorized form. The input objects
+    `X` are domain specific such as: text, currencies, times, enumerations,
+    ect & the resulting vectors are numerical representations of these
+    objects suitable for machine learning.
+    """
+
     @property
     def _estimator_type(self):
         return "vectorizer"
