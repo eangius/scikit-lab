@@ -2,7 +2,8 @@
 
 cython                          # optimized python
 genbadge[all]                   # status badge generation
+pre-commit                      # github commit hoocks
 pytest                          # unit test
 pytest-benchmark                # test runtime profile
 pytest-cov                      # dynamic test code coverage
-pre-commit                      # github commit hoocks
+vulture                         # static unused code

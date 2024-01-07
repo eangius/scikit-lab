@@ -75,7 +75,11 @@ function fn_build() {
 
 # ABOUT: execute quality control
 function fn_test() {
-  echo -e ">> Running test suite ..";
+  echo -e ">> Code analysis .." && \
+  vulture \
+    --min-confidence 90 \
+    scikitlab tests && \
+  echo -e ">> Running test suite .." && \
   pytest \
     --config-file=tests/code_tests.cfg \
     --cov \
