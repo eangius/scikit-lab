@@ -1,6 +1,6 @@
 # scikit-lab
 
-[![stability-beta](https://img.shields.io/badge/stability-experimental-orange.svg)]()
+[![status](https://img.shields.io/badge/status-alpha-orange.svg)]()
 
 
 ### Documentation
@@ -22,5 +22,4 @@ scikit-lab @ git+git://github.com/eangius/sckit-lab.git@main
 
 
 ### Development
-Most local development operations within this project are
-simplified by the `./run` helper script.
+Look at the `./run` helper script to help simplify most local development tasks.
