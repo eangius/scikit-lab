@@ -1,0 +1,97 @@
+site_name: scikit-lab
+repo_url: https://github.com/eangius/scikit-lab/
+site_url: https://eangius.github.io/scikit-lab/
+use_directory_urls: true
+remote_branch: gh-pages
+
+copyright: '&copy; <a href="https://github.com/eangius">eangius</a>'
+extra:
+  generator: false
+
+watch:
+  - scikitlab
+
+# Look & Feel
+theme:
+  name: material
+  locale: en
+  font:
+    text: Ubuntu
+    code: Ubuntu Mono
+  palette:
+    scheme: slate
+    primary: black
+  highlightjs: true
+  hljs_languages:
+  - bash
+  - python
+
+  feature:
+    tabs: true
+  features:
+  - navigation.tabs
+  - navigation.tabs.sticky
+  - navigation.sections
+  - navigation.expand
+  - navigation.path
+  - navigation.indexes
+  - navigation.footer
+  - navigation.top
+  - navigation.tracking
+  - navigation.instant
+  - navigation.instant.prefetch
+  - content.action.view
+  - content.code.annotate
+  - content.code.copy
+  - content.tooltips
+  - content.tabs.link
+  - search.suggest
+  - search.highlight
+  - search.share
+  - toc.follow
+
+
+# Configure behaviours
+plugins:
+- autorefs
+- search
+
+# NOTE: the following is an attempt to automatically create the docs/api/*.md
+# files with the necessary :::module.object references based on the python
+# code. see https://mkdocstrings.github.io/recipes/#automatic-code-reference-pages
+#- gen-files:
+#    scripts:
+#    - scripts/gen_ref_pages.py
+
+- literate-nav:
+    nav_file: SUMMARY.md
+
+- mkdocstrings:
+    handlers:
+      python:
+        options:
+          heading_level: 2
+          show_bases: false
+          show_root_heading: true
+          show_source: false
+          show_root_full_path: false
+          show_root_members_full_path: false
+          show_symbol_type_heading: true
+          show_if_no_docstring: true
+          inherited_members: false
+          docstring_style: numpy
+          docstring_section_style: list
+          filters:  # hide private & dunder symbols
+          - "!^_"
+          - "!^__"
+
+
+nav:
+- Home: index.md
+- API Reference: api/
+
+
+validation:
+  omitted_files: warn
+  absolute_links: warn
+  unrecognized_links: warn
