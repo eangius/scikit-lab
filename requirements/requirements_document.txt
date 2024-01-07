@@ -3,3 +3,5 @@
 mkdocs                          # build static markdown
 mkdocstrings[python]            # auto generate from docstrings
 mkdocs-material                 # style documentations
+mkdocs-gen-files                # auto create doc pages from code
+mkdocs-literate-nav             # auto generate doc navigation from code
