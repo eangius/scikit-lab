@@ -1,14 +1,22 @@
+# ABOUT: git-hub workflow to automatically build project's documentation & publish to git-hub pages
+
 name: Build & Deploy Docs
 on:
   push:
     branches:
       - main
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
+
+      - name: Configure Credentials
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -17,10 +25,22 @@ jobs:
           cache: "pip"
           cache-dependency-path: requirements/requirements_document.txt
 
+      - name: Configure Cache
+        run: |
+          echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
+
+      - name: Restore Cache
+        uses: actions/cache@v3
+        with:
+          key: mkdocs-${{ env.cache_id }}
+          path: .cache
+          restore-keys: |
+            mkdocs-
+
       - name: Install Dependencies
         run: |
           pip install -r requirements/requirements_document.txt
-  
+
       - name: Build MkDocs
         run: |
           mkdocs gh-deploy --force --clean --verbose
