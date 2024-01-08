@@ -10,4 +10,4 @@ Latest user-manual lives [here](https://eangius.github.io/scikit-lab).
 
 
 ### Development
-Look at the `./run` helper script to help simplify most local development tasks.
+Look at the `./run` helper script to simplify most local development tasks.
