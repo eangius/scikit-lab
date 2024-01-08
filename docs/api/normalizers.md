@@ -2,10 +2,16 @@
 
 These are pipeline components that transform the input format or content while
 preserving their original domain semantics. Think of normalizers as necessary
-pre-processors that standardize data for downstream steps. Some conceptual examples
-of normalizers can include: ``ValueScaler`` for numerical ranges,
-``LanguageTranslator`` for written texts, or even ``CurrencyConverter``
-for monetary values.
+pre-processors that standardize data for downstream steps. Some types of normalizers
+include:
+
+| TYPE       | DESCRIPTION                                                                            |
+|------------|----------------------------------------------------------------------------------------|
+| scalers    | adjust values within a target range <br> ie: ``MinMaxScaler``, ``ImageCropper``        |
+| converters | modify values to a common range <br> ie: ``LanguageTranslator``, ``CurrencyConverter`` |
+| formatters | change the structure of the object <br> ie: ``PDFConverter``                           |
+| enrichers  | add context or details to the objects <br> ie: ``NameEntityTagger``, ``Q&ALLM``        |
+
 
 ---
 ::: scikitlab.normalizers.sparsity.DenseTransformer
