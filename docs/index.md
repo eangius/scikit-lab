@@ -1,10 +1,10 @@
-<img src="assets/logo.png" width="25%" height="25%" align="right"/></a>
+<img src="assets/logo.png" width="25%" height="25%" align="right"/>
 
 # Scikit Lab
 This project is an evolving python library of custom & meta [scikit-learn](https://scikit-learn.org/stable/)
 components for various domains.
 
-## Main Goals
+## Project Goals
 
 ✅ **Centralized Dependency**<br>
 Have a single project dependency integrating with the various other libraries in the scikit-learn ecosystem.
