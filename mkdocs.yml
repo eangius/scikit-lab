@@ -15,6 +15,8 @@ watch:
 theme:
   name: material
   locale: en
+  logo: assets/logo.png
+  favicon: assets/logo.png
   font:
     text: Ubuntu
     code: Ubuntu Mono
@@ -85,6 +87,10 @@ plugins:
           - "!^_"
           - "!^__"
 
+
+
+markdown_extensions:
+  - admonition
 
 nav:
 - Home: index.md

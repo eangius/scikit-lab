@@ -1,26 +1,36 @@
-# About
+<img src="assets/logo.png" width="25%" height="25%" align="right"/></a>
 
-## Features
+# Scikit Lab
+This project is an evolving python library of custom & meta [scikit-learn](https://scikit-learn.org/stable/)
+components for various domains.
 
-✅ **Domain Specific Components**<br>
-Build models from a library of higher level components tailored for common domain-specific
-scenarios (ie: temporal, spatial, textual, ..)
+## Main Goals
 
-✅ **Centralized Dependencies**<br>
-Have a single project dependency that harmonizes the various scikit-learn ecosystem.
+✅ **Centralized Dependency**<br>
+Have a single project dependency integrating with the various other libraries in the scikit-learn ecosystem.
+
+✅ **Rich Domain Features**<br>
+Provide ready-to-use signals for common real-world scenarios (ie: spatial, temporal, spatial, textual, ..)
+
+✅ **Streamline End-to-End Pipelines**<br>
+From experimentation to deployment ensure data-preprocessing, sampling & sub-model assumptions hold throughout.
 
 
 ## Installation
-While this project remains in experimental mode, we omit publishing an official
-[PyPi](https://pypi.org) package but can still be installed by `pip` & `requirements`
-files as follows:
+Until this project gets an official [PyPi](https://pypi.org) package,
+it can be used with your favorite tools as follows:
 
 **package manager**
 ```shell
 pip install git+git://github.com/eangius/sckit-lab.git;
 ```
 
-**requirements.txt**
+**requirements file**
 ```requirements.txt
 scikit-lab @ git+git://github.com/eangius/sckit-lab.git@main
 ```
+
+!!! Warning
+	Since this project is currently experimental,
+	it is recommended to install from explicit commit hashes
+	to ensure behaviour remains stable.
