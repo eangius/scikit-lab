@@ -10,7 +10,7 @@ components for various domains.
 Have a single project dependency integrating with the various other libraries in the scikit-learn ecosystem.
 
 ✅ **Rich Domain Features**<br>
-Provide ready-to-use signals for common real-world scenarios (ie: spatial, temporal, spatial, textual, ..)
+Provide ready-to-use signals for common real-world scenarios (ie: spatial, temporal, textual, ..)
 
 ✅ **Streamline End-to-End Pipelines**<br>
 From experimentation to deployment ensure data-preprocessing, sampling & sub-model assumptions hold throughout.
