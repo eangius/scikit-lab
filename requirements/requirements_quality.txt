@@ -1,4 +1,4 @@
-# ABOUT: dependencies related to testing
+# ABOUT: non-deployable dependencies related to internal testing
 
 cython                          # optimized python
 genbadge[all]                   # status badge generation

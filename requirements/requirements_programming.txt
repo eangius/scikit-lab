@@ -1,4 +1,4 @@
-# ABOUT: dependencies related to python code correctness
+# ABOUT: deployable dependencies related to python code correctness
 
 cachetools                                  # caching lib
 overrides                                   # python oo code correctness decorator

@@ -1,4 +1,4 @@
-# ABOUT: dependencies related to documentation
+# ABOUT: non-deployable dependencies related to documentation building
 
 black                           # python code formatter
 mkdocs                          # build static markdown

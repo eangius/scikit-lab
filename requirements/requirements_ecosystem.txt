@@ -1,4 +1,4 @@
-# ABOUT: dependencies related to scikit-learn
+# ABOUT: deployable dependencies related to scikit-learn ecosystem
 
 imbalanced-learn                            # data balancing
 keras                                       # deep-learning

@@ -1,4 +1,4 @@
-# ABOUT: miscellaneous dependencies
+# ABOUT: deployable miscellaneous dependencies
 
 h3                                          # geospatial
 shapely                                     # geometries
