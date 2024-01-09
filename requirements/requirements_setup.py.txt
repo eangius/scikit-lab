@@ -1,3 +1,0 @@
-# ABOUT: no-deployable dependencies that add behind the scenes tooling
-
-requirements-parser                 # parse requirements files

@@ -5,7 +5,6 @@ import scikitlab as proj
 
 
 # External libraries
-import requirements
 import setuptools
 import sys
 from distutils.core import setup
@@ -19,7 +18,11 @@ PROJ_LICENSE = "MIT"
 def parse_requirements(filename: str) -> list:
     """parses a requirements file & get the dependency & version specs ignoring comments"""
     with open(filename, "r") as file:
-        return [req.line.split("#")[0].strip() for req in requirements.parse(file)]
+        return [
+            dependency
+            for dependency in [line.split("#")[0].strip() for line in file.readlines()]
+            if dependency
+        ]
 
 
 setup(
