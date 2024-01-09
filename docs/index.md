@@ -22,12 +22,12 @@ it can be used with your favorite tools as follows:
 
 **package manager**
 ```shell
-pip install git+git://github.com/eangius/sckit-lab.git;
+pip install -e "git+https://github.com/eangius/scikit-lab.git#egg=scikitlab";
 ```
 
 **requirements file**
 ```requirements.txt
-scikit-lab @ git+git://github.com/eangius/sckit-lab.git@main
+-e "git+https://github.com/eangius/scikit-lab.git#egg=scikitlab"
 ```
 
 !!! Warning
