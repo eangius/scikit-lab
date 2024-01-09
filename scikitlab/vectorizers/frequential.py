@@ -25,14 +25,22 @@ class ItemCountVectorizer(ScikitVectorizer):
 
     def __init__(
         self,
-        fn_norm: Callable = None,  # how to transform individual items per input.
-        min_freq: float = 0.0,  # filter rare items bellow this threshold.
-        max_freq: float = 1.0,  # filter frequent items above this threshold.
-        max_items: int = None,  # keep only top most frequent items in corpus.
-        out_of_vocab: str = None,  # feature name for catching un-recognized/filtered items.
-        binary: bool = False,  # simply flag all non-zero counts items.
+        fn_norm: Callable = None,
+        min_freq: float = 0.0,
+        max_freq: float = 1.0,
+        max_items: int = None,
+        out_of_vocab: str = None,
+        binary: bool = False,
         **kwargs,
     ):
+        """
+        :param fn_norm: how to transform individual items per input.
+        :param min_freq: filter rare items bellow this threshold.
+        :param max_freq: filter frequent items above this threshold.
+        :param max_items: keep only top most frequent items in corpus.
+        :param out_of_vocab: feature name for catching un-recognized/filtered items.
+        :param binary: simply flag all non-zero counts items.
+        """
         super().__init__(**kwargs)
         self.fn_norm = fn_norm
         self.min_freq = min_freq
@@ -92,15 +100,10 @@ class ItemCountVectorizer(ScikitVectorizer):
 
     # needed for downstream components (ie: TfidfTransformer) to preserve feature names
     def inverse_transform(self, X):
-        """Return terms per document with nonzero entries in X.
-        Parameters
-        ----------
-        X : {array-like, sparse matrix} of shape (n_samples, n_features)
-            Document-term matrix.
-        Returns
-        -------
-        X_inv : list of arrays of shape (n_samples,)
-            List of arrays of terms.
+        """
+        Return terms per document with nonzero entries in `X`.
+        :param X: {array-like, sparse matrix} of shape (n_samples, n_features) document term matrix.
+        :return: list of arrays of shape (n_samples,)
         """
         # We need CSR format for fast row manipulations.
         n_samples = X.shape[0]

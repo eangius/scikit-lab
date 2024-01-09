@@ -28,13 +28,21 @@ class WeightedNgramVectorizer(FeatureUnion):
     # construct self as concatenation of ngram size transformers.
     def __init__(
         self,
-        vectorizer_type: str = "tfidf",  # Type of the vectorizer "tfidf" or "count"
-        weight_fn: Callable[[int], float] = None,  # function to weight n-grams by size.
-        ngram_range: tuple = (1, 1),  # min/max ngram sizes to build.
-        n_jobs: int = None,  # parallel process
-        verbose: bool = False,  # verbose
-        **kwargs,  # args for base vectorizer
+        vectorizer_type: str = "tfidf",
+        weight_fn: Callable[[int], float] = None,
+        ngram_range: tuple = (1, 1),
+        n_jobs: int = None,
+        verbose: bool = False,
+        **kwargs,
     ):
+        """
+        :param vectorizer_type: Type of the vectorizer "tfidf" or "count"
+        :param weight_fn: function to weight n-grams by size.
+        :param ngram_range: min/max ngram sizes to build.
+        :param n_jobs: parallel process
+        :param verbose: verbose level
+        :param kwargs: other parameters for base vectorizer
+        """
         self.vectorizer_type = vectorizer_type
         self.weight_fn = weight_fn
         self.ngram_range = ngram_range
@@ -80,6 +88,9 @@ class UniversalSentenceEncoder(ScikitVectorizer):
     """
 
     def __init__(self, resource_dir: str = None):
+        """
+        :param resource_dir: path to zip model else downloads from web.
+        """
         self.resource_dir = (
             resource_dir or "https://tfhub.dev/google/universal-sentence-encoder/4"
         )
@@ -92,6 +103,7 @@ class UniversalSentenceEncoder(ScikitVectorizer):
 
     @cached_property
     def dimensionality(self) -> int:
+        """fixed size of embedding"""
         return self.transform([""]).shape[-1]
 
     def get_feature_names_out(self, _unused_input_features=None):

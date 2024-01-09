@@ -12,7 +12,7 @@ from overrides import overrides
 
 class PeriodicityVectorizer(FunctionTransformer):
     """
-    Trigonometrically encodes a periodic signal as combination of sine &
+    Trigonometrically encodes a periodic signal as combination of sin &
     cosine values. This is useful to fairly capture cyclical distances
     between final & start of periods such as for dates. This encoding
     also caps the number of dimensions to 2 acting as a tradeoff between
@@ -20,7 +20,7 @@ class PeriodicityVectorizer(FunctionTransformer):
     signal values & having fine approximation from using various radial-
     basis-functions.
 
-    Note that since both sine & cosine intercept the axis twice per period,
+    Note that since both sin & cosine intercept the axis twice per period,
     both dimensions are required to precisely disambiguate where along
     the original signal the encoding lies.
     """
@@ -30,6 +30,9 @@ class PeriodicityVectorizer(FunctionTransformer):
         period: int,  # TODO: infer this at fit time
         **kwargs,
     ):
+        """
+        :param period: how many units before cycle repeats
+        """
         self.period = period
         super().__init__(
             func=self._forward_func,
@@ -65,10 +68,14 @@ class DateTimeVectorizer(ColumnTransformer):
 
     def __init__(
         self,
-        weights: Dict[str, float] = None,  # time attributes, default all
-        utc_norm: bool = False,  # converts to coordinated universal time
+        weights: Dict[str, float] = None,
+        utc_norm: bool = False,
         **kwargs,
     ):
+        """
+        :param weights: set of (weighted) time attributes. Default to all
+        :param utc_norm: converts to coordinated universal time
+        """
         self.weights = self._validate(weights)
         self.utc_norm = utc_norm
 

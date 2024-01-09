@@ -1,5 +1,6 @@
 # ABOUT: dependencies related to documentation
 
+black                           # python code formatter
 mkdocs                          # build static markdown
 mkdocstrings[python]            # auto generate from docstrings
 mkdocs-material                 # style documentations

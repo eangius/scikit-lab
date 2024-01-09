@@ -41,7 +41,6 @@ theme:
   - navigation.top
   - navigation.tracking
   - navigation.instant
-  - navigation.instant.prefetch
   - content.action.view
   - content.code.annotate
   - content.code.copy
@@ -73,24 +72,31 @@ plugins:
       python:
         options:
           heading_level: 2
+          merge_init_into_class: true
+          separate_signature: true
+          unwrap_annotated: true
           show_bases: false
-          show_root_heading: true
           show_source: false
-          show_root_full_path: false
-          show_root_members_full_path: false
-          show_symbol_type_heading: true
-          show_if_no_docstring: true
+          show_root_heading: true
+          show_root_full_path: true
+          members: no # don't show functions
           inherited_members: false
-          docstring_style: numpy
-          docstring_section_style: list
+          show_if_no_docstring: true
+          show_docstring_functions: true
+          show_docstring_attributes: false
+          show_docstring_parameters: true
+          show_docstring_other_parameters: false
+          docstring_style: sphinx
+          docstring_section_style: table
           filters:  # hide private & dunder symbols
           - "!^_"
           - "!^__"
 
 
-
 markdown_extensions:
+  - abbr
   - admonition
+
 
 nav:
 - Home: index.md
