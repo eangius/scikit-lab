@@ -6,7 +6,7 @@ vectors are the numerical representation suitable for machine learning. Think
 of vectorizers as signal generators that emphasize or suppress the aspects being
 learned & come in the following forms:
 
-| TYPE     | DESCRIPTION                            |
+| Type     | Description                            |
 |----------|----------------------------------------|
 | encoders | transform inputs into vectorized forms |
 | reducers | dimensionality reduce other encodings  |
