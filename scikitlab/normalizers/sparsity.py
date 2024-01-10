@@ -22,7 +22,7 @@ class DenseTransformer(FunctionTransformer):
 
     @staticmethod
     def func(X, **kwargs):
-        return X.todense() if isinstance(X, csr_matrix) else X
+        return np.asarray(X.todense()) if isinstance(X, csr_matrix) else X
 
 
 class SparseTransformer(FunctionTransformer):
