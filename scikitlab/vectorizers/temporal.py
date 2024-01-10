@@ -73,8 +73,11 @@ class DateTimeVectorizer(ColumnTransformer):
         **kwargs,
     ):
         """
-        :param weights: set of (weighted) time attributes. Default to all
+        :param weights: set of (weighted) time attributes. Choose from: `season`,
+                        `month`, `weekday`, `hour`, `minute`, `second`, `microsec`
+                        else default to all with equal weight.
         :param utc_norm: converts to coordinated universal time
+        :param kwargs: other parameters for base transformer.
         """
         self.weights = self._validate(weights)
         self.utc_norm = utc_norm
@@ -126,7 +129,7 @@ class DateTimeVectorizer(ColumnTransformer):
         for i, (field, weight) in enumerate(self.weights.items()):
             if weight != 0:
                 feature, _ = self._possible_attributes[field]
-                transformer_list.append((field, feature, i))
+                transformer_list.append((field, feature, [i]))
                 transformer_weights[field] = weight
         return transformer_list, transformer_weights
 

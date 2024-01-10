@@ -36,7 +36,7 @@ class GeoVectorizer(ItemCountVectorizer):
         """
         :param resolution: Cell size of fetched areas. Range depends on scheme.
         :param index_scheme: Geo indexing scheme: `h3`, `geohash`, `s2` ..
-        :param items: Combination of items to fetch: `cells`, 'neighbors', 'parents' or 'children'.
+        :param items: Combination of items to fetch: `cells` (default), `neighbors`, `parents` or `children`.
         :param offset: Number of neighbouring or hierarchical cells away from hits to fetch.
         """
 
