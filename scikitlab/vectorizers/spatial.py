@@ -27,14 +27,19 @@ class GeoVectorizer(ItemCountVectorizer):
 
     def __init__(
         self,
-        resolution: int,  # cell size of this area (range depends on scheme)
-        index_scheme: str = "h3",  # geo indexing scheme
-        items: Set[
-            str
-        ] = None,  # combo of 'cells', 'neighbors', 'parents' or 'children'.
-        offset: int = 1,  # neighbouring or hierarchical cells away from this
+        resolution: int,
+        index_scheme: str = "h3",
+        items: Set[str] = None,
+        offset: int = 1,
         **kwargs,  # see ItemCountVectorizer inputs.
     ):
+        """
+        :param resolution: Cell size of fetched areas. Range depends on scheme.
+        :param index_scheme: Geo indexing scheme: `h3`, `geohash`, `s2` ..
+        :param items: Combination of items to fetch: `cells`, 'neighbors', 'parents' or 'children'.
+        :param offset: Number of neighbouring or hierarchical cells away from hits to fetch.
+        """
+
         # TODO: implement geohash, s2, ..
         self.index_scheme = index_scheme
         if self.index_scheme != "h3":
