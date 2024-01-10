@@ -38,7 +38,7 @@ def test__DateTimeVectorizer_transform01(input_container):
     X = input_container([])
     component = DateTimeVectorizer(weights={"month": 1})
     assert_vectors(
-        vtrs=component.transform(X),
+        vtrs=component.fit_transform(X),
         n_samples=X.shape[0],
         n_dims=2 * len(component.weights),
     )
@@ -50,7 +50,7 @@ def test__DateTimeVectorizer_transform01(input_container):
 def test__DateTimeVectorizer_transform02(input_container):
     X = input_container([datetime.datetime.now()])
     component = DateTimeVectorizer(weights={"month": 1})
-    assert_vectors(vtrs=component.transform(X), n_samples=X.shape[0], n_dims=2)
+    assert_vectors(vtrs=component.fit_transform(X), n_samples=X.shape[0], n_dims=2)
 
 
 # Vectorizing time parts as weighted should
@@ -60,7 +60,7 @@ def test__DateTimeVectorizer_transform03(input_container):
     X = input_container([datetime.datetime.now()])
     component = DateTimeVectorizer(weights={"month": 0.9, "weekday": 0.5})
     assert_vectors(
-        vtrs=component.transform(X),
+        vtrs=component.fit_transform(X),
         n_samples=X.shape[0],
         n_dims=2 * len(component.weights),
     )
@@ -71,7 +71,7 @@ def test__DateTimeVectorizer_transform03(input_container):
 def test__DateTimeVectorizer_transform04(input_container, component):
     X = input_container(RandomData.list(RandomData.date))
     assert_vectors(
-        vtrs=component.transform(X),
+        vtrs=component.fit_transform(X),
         n_samples=X.shape[0],
         n_dims=2 * len(component.weights),
     )

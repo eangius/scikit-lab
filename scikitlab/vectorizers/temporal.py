@@ -5,9 +5,9 @@
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.compose import ColumnTransformer
 from typing import Dict, Tuple, List, Optional
+from overrides import overrides
 import numpy as np
 import pandas as pd
-from overrides import overrides
 
 
 class PeriodicityVectorizer(FunctionTransformer):
@@ -93,19 +93,18 @@ class DateTimeVectorizer(ColumnTransformer):
         return
 
     @overrides
-    def transform(self, X):
+    def fit_transform(self, X, y=None):
         if not X.size:
             return np.ndarray(shape=(0, 2 * len(self.transformer_weights.keys())))
 
         # convert to pandas to access time parts.
-        X = (
-            X[0].tolist()
+        X = pd.to_datetime(
+            X.iloc[:, 0].tolist()
             if isinstance(X, pd.DataFrame)
             else X.to_list()
             if isinstance(X, pd.Series)
             else X
         )
-        X = pd.to_datetime(X)
         X = X.tz_localize(tz="utc", ambiguous="infer") if self.utc_norm else X
         X = pd.DataFrame(X)[0]
 
@@ -121,7 +120,7 @@ class DateTimeVectorizer(ColumnTransformer):
                 for x in X
             ]
         )
-        return super().fit_transform(X)  # avoid unfitted checks
+        return super().fit_transform(X, y)  # avoid unfitted checks
 
     def _build(self) -> Tuple[List, Dict]:
         transformer_list = []
@@ -129,7 +128,7 @@ class DateTimeVectorizer(ColumnTransformer):
         for i, (field, weight) in enumerate(self.weights.items()):
             if weight != 0:
                 feature, _ = self._possible_attributes[field]
-                transformer_list.append((field, feature, [i]))
+                transformer_list.append((field, feature, i))
                 transformer_weights[field] = weight
         return transformer_list, transformer_weights
 
