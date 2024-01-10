@@ -3,6 +3,7 @@
 # External libraries
 from sklearn.preprocessing import FunctionTransformer
 from scipy.sparse import csr_matrix
+import numpy as np
 
 
 class DenseTransformer(FunctionTransformer):
@@ -21,7 +22,7 @@ class DenseTransformer(FunctionTransformer):
 
     @staticmethod
     def func(X, **kwargs):
-        return X.todense()
+        return X.todense() if isinstance(X, csr_matrix) else X
 
 
 class SparseTransformer(FunctionTransformer):
@@ -40,4 +41,4 @@ class SparseTransformer(FunctionTransformer):
 
     @staticmethod
     def func(X, **kwargs):
-        return csr_matrix(X)
+        return csr_matrix(X) if isinstance(X, np.ndarray) else X
