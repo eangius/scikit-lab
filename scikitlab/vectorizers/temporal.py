@@ -93,7 +93,40 @@ class DateTimeVectorizer(ColumnTransformer):
         return
 
     @overrides
-    def fit_transform(self, X, y=None):
+    def transform(self, X):
+        return super().transform(self._expand_datetime(X))
+
+    @overrides
+    def fit_transform(self, X, y=None, **fit_params):
+        X = self._expand_datetime(X)
+        return super().fit_transform(X, y, **fit_params)  # avoid unfitted checks
+
+    @staticmethod
+    def _validate(weights: Optional[Dict[str, float]]) -> Dict[str, float]:
+        # default all attributes if empty
+        weights = weights or {
+            attr: 1 for attr in DateTimeVectorizer._possible_attributes.keys()
+        }
+        # validate all weights
+        for k, v in weights.items():
+            if k not in DateTimeVectorizer._possible_attributes.keys():
+                raise ValueError(f"Unrecognized time attribute: '{k}'")
+            if v < 0 or v > 1.0:
+                raise ValueError(f"Weight of time attribute '{k}' is out of range")
+        return weights
+
+    def _build(self) -> Tuple[List, Dict]:
+        transformer_list = []
+        transformer_weights = dict()
+        for i, (field, weight) in enumerate(self.weights.items()):
+            if weight != 0:
+                feature, _ = self._possible_attributes[field]
+                transformer_list.append((field, feature, i))
+                transformer_weights[field] = weight
+        return transformer_list, transformer_weights
+
+    def _expand_datetime(self, X) -> np.ndarray:
+        """Expands out a datetime column into the configured time attributes."""
         if not X.size:
             return np.ndarray(shape=(0, 2 * len(self.transformer_weights.keys())))
 
@@ -120,31 +153,7 @@ class DateTimeVectorizer(ColumnTransformer):
                 for x in X
             ]
         )
-        return super().fit_transform(X, y)  # avoid unfitted checks
-
-    def _build(self) -> Tuple[List, Dict]:
-        transformer_list = []
-        transformer_weights = dict()
-        for i, (field, weight) in enumerate(self.weights.items()):
-            if weight != 0:
-                feature, _ = self._possible_attributes[field]
-                transformer_list.append((field, feature, i))
-                transformer_weights[field] = weight
-        return transformer_list, transformer_weights
-
-    @staticmethod
-    def _validate(weights: Optional[Dict[str, float]]) -> Dict[str, float]:
-        # default all attributes if empty
-        weights = weights or {
-            attr: 1 for attr in DateTimeVectorizer._possible_attributes.keys()
-        }
-        # validate all weights
-        for k, v in weights.items():
-            if k not in DateTimeVectorizer._possible_attributes.keys():
-                raise ValueError(f"Unrecognized time attribute: '{k}'")
-            if v < 0 or v > 1.0:
-                raise ValueError(f"Weight of time attribute '{k}' is out of range")
-        return weights
+        return X
 
     # supported attributes with their frequency & date-time extraction function.
     _possible_attributes = {
