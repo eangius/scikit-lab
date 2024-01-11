@@ -5,8 +5,7 @@ from scikitlab.normalizers.sparsity import SparseTransformer, DenseTransformer
 from scikitlab.vectorizers.temporal import PeriodicityVectorizer, DateTimeVectorizer
 from scikitlab.vectorizers.spatial import GeoVectorizer
 from scikitlab.vectorizers.text import WeightedNgramVectorizer, UniversalSentenceEncoder
-from scikitlab.samplers.data_balancer import RegressionBalancer
-from scikitlab.samplers.vector_balancer import VectorBalancer
+from scikitlab.samplers.balancing import RegressionBalancer, VectorBalancer
 
 # External libraries
 import pytest
