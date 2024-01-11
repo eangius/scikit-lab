@@ -5,6 +5,8 @@ from scikitlab.normalizers.sparsity import SparseTransformer, DenseTransformer
 from scikitlab.vectorizers.temporal import PeriodicityVectorizer, DateTimeVectorizer
 from scikitlab.vectorizers.spatial import GeoVectorizer
 from scikitlab.vectorizers.text import WeightedNgramVectorizer, UniversalSentenceEncoder
+from scikitlab.samplers.data_balancer import RegressionBalancer
+from scikitlab.samplers.vector_balancer import VectorBalancer
 
 # External libraries
 import pytest
@@ -12,8 +14,13 @@ import joblib
 
 
 components = [
+    # samplers
+    RegressionBalancer(sampling_mode="over"),
+    VectorBalancer(),
+    # normalizers
     SparseTransformer(),
     DenseTransformer(),
+    # vectorizers
     PeriodicityVectorizer(period=24),
     DateTimeVectorizer(),
     WeightedNgramVectorizer(),

@@ -8,10 +8,13 @@ from overrides import overrides
 from imblearn.utils._validation import ArraysTransformer
 
 
-# ABOUT: This abstract class to scikit sampler interface should be inherited
-# by data transformer components. These are components that transform the
-# volume of data-points (ie: over/under/random sampling).
 class ScikitSampler(ABC, BaseSampler):
+    """
+    Base implementation of scikit transformers that are responsible for
+    sampling input data. These are components that modify the volume &
+    distribution of data at learn time.
+    """
+
     @property
     def _estimator_type(self):
         return "sampler"

@@ -12,7 +12,12 @@ from imblearn.under_sampling import RandomUnderSampler
 import pandas as pd
 
 
+def fn_constant(_x):
+    return 1
+
+
 class RegressionBalancer(ScikitSampler):
+
     """
     Over or under samples a regression dataset based on a category mapping
     over the target variables. This is useful when certain ranges in the
@@ -21,11 +26,16 @@ class RegressionBalancer(ScikitSampler):
 
     def __init__(
         self,
-        sampling_mode: str,  # either "over" or "under" sampling
-        fn_classifier: Callable,  # how to triage regressor variable into classes
-        random_state: int = 0,  # determinism
+        sampling_mode: str,
+        fn_classifier: Callable = fn_constant,  # no classification
+        random_state: int = 0,
         **kwargs,
     ):
+        """
+        :param sampling_mode: either `over` or `under` sampling
+        :param fn_classifier: how to triage regression target into class ranges
+        :param random_state:  for determinism
+        """
         super().__init__(**kwargs)
         self.sampling_mode = sampling_mode
         self.fn_classifier = fn_classifier
@@ -35,7 +45,7 @@ class RegressionBalancer(ScikitSampler):
     @overrides
     def _fit_resample(self, X, y):
         # classify output into a temporary target
-        y = y.to_numpy().ravel()
+        y = y.to_numpy().ravel()  # <<dbg don't assume pandas!
         y_cls = pd.Series(y).apply(self.fn_classifier).astype("category")
         sampling_dist = y_cls.value_counts().to_dict()
 
