@@ -42,6 +42,9 @@ def test__DateTimeVectorizer_transform01(input_container):
         n_samples=X.shape[0],
         n_dims=2 * len(component.weights),
     )
+    assert_feature_names(
+        features=component.get_feature_names_out(), attributes=component.weights.keys()
+    )
 
 
 # Vectorizing one time part should yield 2 dimensions per part
@@ -51,6 +54,9 @@ def test__DateTimeVectorizer_transform02(input_container):
     X = input_container([datetime.datetime.now()])
     component = DateTimeVectorizer(weights={"month": 1})
     assert_vectors(vtrs=component.fit_transform(X), n_samples=X.shape[0], n_dims=2)
+    assert_feature_names(
+        features=component.get_feature_names_out(), attributes=component.weights.keys()
+    )
 
 
 # Vectorizing time parts as weighted should
@@ -64,6 +70,9 @@ def test__DateTimeVectorizer_transform03(input_container):
         n_samples=X.shape[0],
         n_dims=2 * len(component.weights),
     )
+    assert_feature_names(
+        features=component.get_feature_names_out(), attributes=component.weights.keys()
+    )
 
 
 @pytest.mark.stress
@@ -75,12 +84,24 @@ def test__DateTimeVectorizer_transform04(input_container, component):
         n_samples=X.shape[0],
         n_dims=2 * len(component.weights),
     )
+    assert_feature_names(
+        features=component.get_feature_names_out(), attributes=component.weights.keys()
+    )
 
 
 def assert_vectors(vtrs, n_samples, n_dims):
     assert isinstance(vtrs, np.ndarray)
     assert vtrs.shape == (n_samples, n_dims)
     assert np.all((vtrs >= -1) & (vtrs <= 1))
+
+
+# Ensure all time attributes requested are have 2 signals
+def assert_feature_names(features, attributes):
+    assert isinstance(features, np.ndarray)
+    assert len(features) == len(attributes) * 2
+    assert set(features) == {
+        f"{attr}__{trig}" for attr in attributes for trig in {"sin", "cos"}
+    }
 
 
 @pytest.fixture
