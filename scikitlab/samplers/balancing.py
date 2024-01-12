@@ -6,6 +6,8 @@ from scikitlab.samplers import ScikitSampler
 # External libraries
 import warnings
 import pandas as pd
+import numpy as np
+import functools
 from typing import Callable
 from overrides import overrides
 from imblearn.under_sampling import RandomUnderSampler, EditedNearestNeighbours
@@ -13,12 +15,7 @@ from imblearn.over_sampling import BorderlineSMOTE
 from imblearn.over_sampling import RandomOverSampler
 
 
-def fn_constant(_x):
-    return 1
-
-
 class RegressionBalancer(ScikitSampler):
-
     """
     Over or under samples a regression dataset based on a category mapping
     over the target variables. This is useful when certain ranges in the
@@ -28,7 +25,7 @@ class RegressionBalancer(ScikitSampler):
     def __init__(
         self,
         sampling_mode: str,
-        fn_classifier: Callable = fn_constant,  # no classification
+        fn_classifier: Callable = None,  # no classification
         random_state: int = 0,
         **kwargs,
     ):
@@ -46,14 +43,25 @@ class RegressionBalancer(ScikitSampler):
     @overrides
     def _fit_resample(self, X, y):
         # classify output into a temporary target
-        y = y.to_numpy().ravel()  # <<dbg don't assume pandas!
+        orig_type = type(y)
+        y = (
+            y.to_numpy()
+            if isinstance(y, (pd.DataFrame, pd.Series))
+            else np.array(y)
+            if isinstance(y, list)
+            else y
+        ).ravel()
         y_cls = pd.Series(y).apply(self.fn_classifier).astype("category")
         sampling_dist = y_cls.value_counts().to_dict()
 
         # clone minority classes to match the majority
         if self.sampling_mode.lower() == "over":
-            target_cls = max(sampling_dist)
-            target_n = sampling_dist[target_cls]
+            target_cls, target_n = functools.reduce(
+                lambda item_acc, item_x: item_acc
+                if item_acc[1] > item_x[1]
+                else item_x,
+                sampling_dist.items(),
+            )
             sampler = RandomOverSampler(
                 sampling_strategy={
                     cls: target_n for cls in sampling_dist if cls != target_cls
@@ -63,8 +71,12 @@ class RegressionBalancer(ScikitSampler):
 
         # delete from majority classes to match the minority
         elif self.sampling_mode.lower() == "under":
-            target_cls = min(sampling_dist)
-            target_n = sampling_dist[target_cls]
+            target_cls, target_n = functools.reduce(
+                lambda item_acc, item_x: item_acc
+                if item_acc[1] < item_x[1]
+                else item_x,
+                sampling_dist.items(),
+            )
             sampler = RandomUnderSampler(
                 sampling_strategy={
                     cls: target_n for cls in sampling_dist if cls != target_cls
@@ -81,9 +93,15 @@ class RegressionBalancer(ScikitSampler):
             return X, y
 
         # resample & align indices of classified outputs back to original
-        X_resample, y_cls = sampler.fit_resample(X, y_cls)
+        X_resample, y_cls = sampler.fit_resample(X, y_cls.to_numpy())
         y_resample = y[sampler.sample_indices_]
-
+        y_resample = (
+            pd.DataFrame(y_resample)
+            if orig_type is pd.DataFrame
+            else pd.Series(y_resample)
+            if orig_type is pd.Series
+            else y_resample
+        )
         return X_resample, y_resample
 
 
