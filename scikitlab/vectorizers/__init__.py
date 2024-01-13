@@ -20,6 +20,7 @@ class ScikitVectorizer(ABC, BaseEstimator, TransformerMixin):
         return "vectorizer"
 
     def fit(self, X, y=None):
+        self._check_n_features(X, reset=True)
         return self
 
     def transform(self, X, y=None):
@@ -28,3 +29,8 @@ class ScikitVectorizer(ABC, BaseEstimator, TransformerMixin):
     # Convenience for sub classes.
     def fit_transform(self, X, y=None):
         return self.fit(X, y).transform(X, y)
+
+    # Composites & pipelines pass feature names of previous ones to forward
+    # propagate names when current component cannot.
+    def get_feature_names_out(self, input_features=None):
+        return input_features
