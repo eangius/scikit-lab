@@ -14,7 +14,7 @@ class DenseTransformer(FunctionTransformer):
 
     def __init__(self):
         super().__init__(
-            func=DenseTransformer.func,
+            func=self.func,
             inverse_func=SparseTransformer.func,
             accept_sparse=True,
             check_inverse=False,
@@ -33,7 +33,7 @@ class SparseTransformer(FunctionTransformer):
 
     def __init__(self):
         super().__init__(
-            func=SparseTransformer.func,
+            func=self.func,
             inverse_func=DenseTransformer.func,
             accept_sparse=False,
             check_inverse=False,
