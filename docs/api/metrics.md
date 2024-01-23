@@ -5,4 +5,4 @@ benchmarking evaluation criteria that are usable in hyper-tuning
 or model reporting goals
 
 ---
-🚧 TODO
+::: scikitlab.metrics.mutual_info.MutualInfoMetric
