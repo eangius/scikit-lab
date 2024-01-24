@@ -108,9 +108,9 @@ class MutualInfoMetric:
         # https://course.ccs.neu.edu/cs6140sp15/7_locality_cluster/Assignment-6/NMI.pdf
         with np.errstate(over="ignore"):
             n_features = X.shape[1]
-            hTotal = np.nan_to_num(np.asarray(entropy(X)).ravel()) + np.nan_to_num(
-                np.repeat(y_entropy, n_features)
-            )
+            hX = np.nan_to_num(np.asarray(entropy(X)).ravel())
+            hy = np.nan_to_num(np.repeat(y_entropy, n_features))
+            hTotal = hX + hy
             scores = 2 * np.divide(
                 mi,
                 hTotal,
