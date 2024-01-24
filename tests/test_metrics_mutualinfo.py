@@ -63,6 +63,68 @@ def test__mutualinfo_error02():
         )
 
 
+# single input vector x should work
+@pytest.mark.unit
+def test__mutualinfo_shape01():
+    X = np.array([1, 4, 6, 9])
+    y = np.array([10, 20, 30, 10])
+    assert_scores(
+        actual_scores=MutualInfoMetric().score(X, y),
+        expected_scores=np.array([0.8421421195050166]),
+        n_dims=1,
+    )
+
+
+# multiple y targets as matrix should fail.
+@pytest.mark.unit
+def test__mutualinfo_shape02():
+    with pytest.raises(ValueError):
+        MutualInfoMetric().score(
+            X=np.array(
+                [
+                    [1, 2, 3],
+                    [4, 5, 5],
+                    [6, 6, 7],
+                    [9, 8, 6],
+                ]
+            ),
+            y=np.array(
+                [
+                    [10, 11],
+                    [20, 22],
+                    [30, 33],
+                    [10, 9],
+                ]
+            ),  # not 1d
+        )
+
+
+# perfect vs no vs inverse vs partial correlation should score accordingly
+@pytest.mark.unit
+def test__mutualinfo_basic():
+    X = np.array(
+        [
+            [1, 3, 9, -2],
+            [4, 3, 6, -2],
+            [6, 3, 4, -3],
+            [9, 3, 1, -5],
+        ]
+    )
+    y = np.array([1, 4, 6, 9])
+    assert_scores(
+        actual_scores=MutualInfoMetric().score(X, y),
+        expected_scores=np.array(
+            [
+                1.0,  # perfect
+                0.0,  # no correlation
+                1.0,  # perfect inverse
+                0.8315105705364639,  # partial
+            ]
+        ),
+        n_dims=X.shape[1],
+    )
+
+
 # between discrete vectors
 @pytest.mark.unit
 def test__mutualinfo_discrete01():
@@ -169,16 +231,17 @@ def test__mutualinfo_binary01():
             [0, 0, 0],
             [1, 1, 0],
             [0, 0, 1],
+            [1, 1, 1],
         ]
     )
-    y = np.array([1, 0, 0, 0])
+    y = np.array([1, 0, 0, 0, 1])
     assert_scores(
         actual_scores=MutualInfoMetric().score(X, y),
         expected_scores=np.array(
             [
-                1.7976931348623157e308,
-                0.6225562489182657,
-                0.6225562489182657,
+                0.039946188043949275,
+                0.5299470414358541,
+                0.5299470414358541,
             ]
         ),
         n_dims=X.shape[1],

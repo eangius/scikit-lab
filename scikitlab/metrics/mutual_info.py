@@ -2,7 +2,7 @@
 
 
 # External libraries
-from enum import Enum
+from enum import Enum, auto
 from scipy.stats import entropy
 from sklearn.feature_selection import mutual_info_regression, mutual_info_classif
 from sklearn.utils import check_X_y
@@ -12,10 +12,13 @@ import scipy
 
 
 class VectorType(Enum):
-    DISCRETE = 1  # all binary, ordinal
-    CONTINUOUS = 2  # all real values
-    IMAGINARY = 3  # all with imaginary parts
-    ZEROS = 4  # unknown all zeros (discrete or cont)
+    DISCRETE = auto()  # all binary, ordinal
+    CONTINUOUS = auto()  # all real values
+    COMPLEX = auto()  # all with imaginary parts
+    ZEROS = auto()  # unknown all zeros (discrete or cont)
+
+    def __repr__(self):
+        return self.name
 
 
 class MutualInfoMetric:
@@ -59,14 +62,12 @@ class MutualInfoMetric:
         :return:  Array of normalized mutual information scores between each of
                   the `X` features & `y` target of shape `(n_features,)`
         """
-
         # validate inputs
         if y is None and self.y is None:
             raise ValueError(
                 "No target vector y was specified at metric "
                 "initialization or at calculation time."
             )
-        check_X_y(X, y if y is not None else self.y, accept_sparse=True)
 
         # Use precomputed y when not specified, else temporarily
         # compute new y target.
@@ -77,18 +78,24 @@ class MutualInfoMetric:
         else:
             fn_mutual_info, y_entropy, y = self._set(y)
 
-        # Ensure consistency in X.
         X = X.reshape(-1, 1) if X.ndim == 1 else X
-        vtr_types = [self._vector_type(vtr) for vtr in X]
+        check_X_y(X, y, accept_sparse=True)
+
+        # Ensure type consistency in X.
+        vtr_types = (
+            [self._vector_type(X.ravel())]
+            if X.ndim == 1
+            else [self._vector_type(vtr) for vtr in X]
+        )
         if len({t for t in vtr_types if t != VectorType.ZEROS}) > 1:
             raise ValueError(
                 f"X mixes vector dimensions types {set(vtr_types)}. "
-                "Ensure all dimensions resolve to 'discrete' or 'continuous' "
+                "Ensure all resolve to 'discrete' or 'continuous' "
                 "vectors or pass one dimension at a time."
             )
 
         # Bulk calculate for each X dimension with respects to y
-        scores = fn_mutual_info(
+        mi = fn_mutual_info(
             X,
             y=y,
             discrete_features=all(
@@ -97,15 +104,25 @@ class MutualInfoMetric:
             **self.kwargs,
         )
 
-        # Normalize to 0-1 score, neutralizing NaNs
-        hX = np.asarray(entropy(X)).ravel()
-        hY = np.repeat(y_entropy, X.shape[1])
-        scores = np.nan_to_num(scores / np.mean([hX, hY], axis=0))
+        # Normalize raw mutual info scores (estimates) to 0-1 score as per
+        # https://course.ccs.neu.edu/cs6140sp15/7_locality_cluster/Assignment-6/NMI.pdf
+        with np.errstate(over="ignore"):
+            n_features = X.shape[1]
+            hTotal = np.nan_to_num(np.asarray(entropy(X)).ravel()) + np.nan_to_num(
+                np.repeat(y_entropy, n_features)
+            )
+            scores = 2 * np.divide(
+                mi,
+                hTotal,
+                out=np.ones(n_features),
+                where=(hTotal != 0) & (hTotal != np.NaN),
+            )
+        scores = np.minimum(scores, np.ones(n_features))  # cap max at 100%
+        scores = np.maximum(scores, np.zeros(n_features))  # cap min at 0%
 
         # TODO:
         #  - implement adjusted mutual info to handle noise!
         #  - perform early outs to avoid computing entropy or mutual info
-        #  - handle or restrict multi dimensional y
         return scores
 
     # Alias for explicitly calling the metric
@@ -117,23 +134,27 @@ class MutualInfoMetric:
         vtr = np.asarray(vtr.todense()).ravel() if scipy.sparse.issparse(vtr) else vtr
 
         if not np.any(vtr):
-            return VectorType.ZEROS  # unknown continuous or discrete
+            return VectorType.ZEROS  # unknown if continuous or discrete
 
-        if np.all(np.iscomplex(vtr)):
-            return VectorType.IMAGINARY
+        if np.any(np.iscomplex(vtr)):
+            return VectorType.COMPLEX
 
         if np.all(np.isreal(vtr)):
-            if any(abs(dim - int(dim)) > 0 for dim in vtr):
-                return VectorType.CONTINUOUS
-
-            if all(dim.is_integer() for dim in vtr):
+            if all(abs(dim - int(dim)) == 0 for dim in vtr):  # or dim.is_integer()
                 return VectorType.DISCRETE
+            else:
+                return VectorType.CONTINUOUS
 
         raise NotImplementedError(f"Unrecognized vector type: {vtr.dtype}")
 
     @staticmethod
     def _set(y: np.array):
-        y_entropy = entropy(y)
+        if y.ndim != 1:
+            raise ValueError(
+                f"Invalid target vector y of shape {y.shape} " "is not 1 dimensional."
+            )
+
+        y_entropy = 0 if not np.all(y) else entropy(y)
         fn_mutual_info = (
             mutual_info_regression
             if MutualInfoMetric._vector_type(y) == VectorType.CONTINUOUS
