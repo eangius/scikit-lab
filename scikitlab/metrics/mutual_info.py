@@ -104,13 +104,16 @@ class MutualInfoMetric:
             **self.kwargs,
         )
 
-        # Normalize raw mutual info scores (estimates) to 0-1 score as per
+        # Normalize raw mutual info scores to 0-1 score as per this implementation.
         # https://course.ccs.neu.edu/cs6140sp15/7_locality_cluster/Assignment-6/NMI.pdf
-        with np.errstate(over="ignore"):
+        # Notice that depending on values of X, some overflow or divide by zero exists
+        # which we try to avoid, mitigate or at worst ignore. Also given scikits mutual
+        # info is an estimate we truncate to cap score within ranges.
+        with np.errstate(over="ignore", divide="ignore", invalid="ignore"):
             n_features = X.shape[1]
             hX = np.nan_to_num(np.asarray(entropy(X)).ravel())
-            hy = np.nan_to_num(np.repeat(y_entropy, n_features))
-            hTotal = hX + hy
+            hY = np.nan_to_num(np.repeat(y_entropy, n_features))
+            hTotal = hX + hY
             scores = 2 * np.divide(
                 mi,
                 hTotal,
