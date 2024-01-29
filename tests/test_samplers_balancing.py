@@ -3,19 +3,20 @@
 # Internal libraries
 from tests.common.pytest_parametrized import pytest_mark_polymorphic_exclude_series
 from tests.common.random_data import RandomData
-from scikitlab.samplers.balancing import RegressionBalancer
+from scikitlab.samplers.balancing import RegressionBalancer, StrataBalancer
 
 # External libraries
 import pytest
 import random
 import functools
 import numpy as np
+import pandas as pd
 
 
 # sampling should add or remove the volume of minority or majority classes
 @pytest_mark_polymorphic_exclude_series
 @pytest.mark.parametrize("sampling_mode", ["under", "over"])
-def test__RegressionBalancer_transform01(input_container, sampling_mode):
+def test__RegressionBalancer_resample01(input_container, sampling_mode):
     X = input_container(
         [["foo", "bar", "baz"], ["zoo", "boo", "goo"], ["goo", "zoo", "xyz"]]
     )
@@ -32,7 +33,7 @@ def test__RegressionBalancer_transform01(input_container, sampling_mode):
 @pytest.mark.stress
 @pytest_mark_polymorphic_exclude_series
 @pytest.mark.parametrize("sampling_mode", ["under", "over"])
-def test__RegressionBalancer_transform02(input_container, sampling_mode, dataset):
+def test__RegressionBalancer_resample02(input_container, sampling_mode, dataset):
     X, y = dataset
     X = input_container(X)
     y = input_container(y)
@@ -43,6 +44,47 @@ def test__RegressionBalancer_transform02(input_container, sampling_mode, dataset
     sample_X, sample_y = component.fit_resample(X, y)
     assert_data(X, sample_X, input_container, sampling_mode)
     assert_data(y, sample_y, input_container, sampling_mode)
+
+
+# sampling from dataframes should preserve column types.
+@pytest.mark.parametrize("sampling_mode", ["under", "over"])
+def test__StrataBalancer_resample01(sampling_mode):
+    X = np.array(
+        [
+            [1, 2, 3, "a"],
+            [1, 2, 30, "b"],
+            [10, 20, 30, "c"],
+            [10, 2, 30, "d"],
+        ]
+    )
+    X = pd.DataFrame(X, columns=["in0", "in1", "in2", "in3"])
+    X["in0"] = X["in0"].astype(int)
+    X["in1"] = X["in1"].astype(float)
+    X["in2"] = X["in2"].astype("category")
+    X["in3"] = X["in3"].astype(str)
+
+    y = np.array(
+        [
+            [111, 1],
+            [111, 2],
+            [222, 3],
+            [222, 4],
+        ]
+    )
+    y = pd.DataFrame(y, columns=["out1", "out2"])
+    y["out1"] = y["out1"].astype("category")
+    y["out2"] = y["out2"].astype(int)
+
+    strata = ["in1", "in2"]
+    component = StrataBalancer(sampling_mode=sampling_mode, columns=strata)
+    sample_X, sample_y = component.fit_resample(X, y)
+    assert_data(X, sample_X, pd.DataFrame, sampling_mode)
+    assert_data(y, sample_y, pd.DataFrame, sampling_mode)
+    assert (
+        len(set(sample_X.groupby(strata, observed=True).size())) == 1
+    )  # equal vol per strata
+    assert X.dtypes.sort_index().equals(sample_X.dtypes.sort_index())  # preserve types
+    assert y.dtypes.sort_index().equals(sample_y.dtypes.sort_index())  # preserve types
 
 
 def assert_data(orig, sample, input_container, sampling_mode):

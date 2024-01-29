@@ -11,6 +11,8 @@ preserved & allows for experimentation to treating data distributions & volumes
 as hyper-tunable parameters.
 
 ---
+::: scikitlab.samplers.balancing.StrataBalancer
+---
 ::: scikitlab.samplers.balancing.RegressionBalancer
 ---
 ::: scikitlab.samplers.balancing.VectorBalancer
