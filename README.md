@@ -2,7 +2,7 @@
 
 # scikit-lab
 
-[![status](https://img.shields.io/badge/status-alpha-orange.svg)]()
+[![status](https://img.shields.io/badge/status-alpha-blue.svg)]()
 
 
 ### Documentation
