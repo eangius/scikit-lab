@@ -93,13 +93,13 @@ class DateTimeVectorizer(ColumnTransformer):
         return
 
     @overrides
-    def transform(self, X):
-        return super().transform(self._expand_datetime(X))
+    def transform(self, X, **params):
+        return super().transform(self._expand_datetime(X), **params)
 
     @overrides
-    def fit_transform(self, X, y=None, **fit_params):
+    def fit_transform(self, X, y=None, **params):
         X = self._expand_datetime(X)
-        return super().fit_transform(X, y, **fit_params)  # avoid unfitted checks
+        return super().fit_transform(X, y, **params)  # avoid unfitted checks
 
     @staticmethod
     def _validate(weights: Optional[Dict[str, float]]) -> Dict[str, float]:
