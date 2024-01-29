@@ -8,7 +8,8 @@ if [[ "${VIRTUAL_ENV}" == "" ]]; then
   if [ -d ".venv" ]; then
     source ".venv/bin/activate";
   else
-    echo "Need a virtual environment to activate";
+    echo "Need a virtual environment to activate. Run:";
+    echo "python -m venv .venv";
     exit 1;
   fi;
 fi
