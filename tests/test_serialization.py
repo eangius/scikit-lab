@@ -5,6 +5,7 @@ from scikitlab.normalizers.sparsity import SparseTransformer, DenseTransformer
 from scikitlab.vectorizers.temporal import PeriodicityVectorizer, DateTimeVectorizer
 from scikitlab.vectorizers.spatial import GeoVectorizer
 from scikitlab.vectorizers.text import WeightedNgramVectorizer, UniversalSentenceEncoder
+from scikitlab.vectorizers.encoder import EnumeratedEncoder
 from scikitlab.samplers.balancing import (
     RegressionBalancer,
     VectorBalancer,
@@ -25,6 +26,7 @@ components = [
     SparseTransformer(),
     DenseTransformer(),
     # vectorizers
+    EnumeratedEncoder(),
     PeriodicityVectorizer(period=24),
     DateTimeVectorizer(),
     WeightedNgramVectorizer(),

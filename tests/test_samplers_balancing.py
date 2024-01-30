@@ -47,6 +47,7 @@ def test__RegressionBalancer_resample02(input_container, sampling_mode, dataset)
 
 
 # sampling from dataframes should preserve column types.
+@pytest.mark.unit
 @pytest.mark.parametrize("sampling_mode", ["under", "over"])
 def test__StrataBalancer_resample01(sampling_mode):
     X = np.array(

@@ -2,6 +2,7 @@
 
 # Internal libraries
 from scikitlab.samplers import ScikitSampler
+from scikitlab.vectorizers.encoder import EnumeratedEncoder
 
 # External libraries
 import warnings
@@ -88,19 +89,19 @@ class StrataBalancer(ScikitSampler):
             elif issubclass(orig_type_X, pd.Series):
                 strata_column_idxs = [0]
 
-        # isolate target strata & balance it. Note that samplers do not accept multi-
-        # label (Nd arrays) y outputs so we temporarily categorize them as 1d.
+        # isolate target strata & balance it. Note that samplers don't accept
+        # multi-label y output so we temporary encode them into 1d arrays.
         X_resample, y_resample = self._slice(X, y, strata_column_idxs)
-        indexer = {str(y): y for y in y_resample}
-        if len(indexer) <= 1:
+        encoder = EnumeratedEncoder()
+        y_resample = encoder.fit_transform(y_resample)
+        if encoder.n_classes <= 1:
             return X, y  # already balanced
 
         X_resample, y_resample = sampler.fit_resample(
             X=X_resample,
-            y=np.array([str(y) for y in y_resample]),
+            y=y_resample,
         )
-        y_resample = np.array([indexer[y] for y in y_resample])
-        # TODO: custom EnumerateEncoder()
+        y_resample = encoder.inverse_transform(y_resample)
 
         # reconstruct to original columns
         target_column_idxs = list(
