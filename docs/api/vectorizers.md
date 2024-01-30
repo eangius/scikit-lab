@@ -12,6 +12,8 @@ learned & come in the following forms:
 | reducers | dimensionality reduce other encodings  |
 
 ---
+::: scikitlab.vectorizers.encoder.EnumeratedEncoder
+---
 ::: scikitlab.vectorizers.frequential.ItemCountVectorizer
 ---
 ::: scikitlab.vectorizers.spatial.GeoVectorizer
